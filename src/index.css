@@ -1,40 +1,14 @@
+@import './styles/variables.css';
+@import './styles/components.css';
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-main);
 }
 
-/* fundo da página */
 body {
   margin: 0;
   min-height: 100vh;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background: linear-gradient(
-    to bottom,
-    #ff8fa3 0%,
-    #ff4d6d 40%,
-    #d00000 100%
-  );
-}
-
-/* card do formulário */
-.card {
-  width: 420px;
-
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-
-  border-radius: 16px;
-  padding: 40px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-
-  color: white;
 }

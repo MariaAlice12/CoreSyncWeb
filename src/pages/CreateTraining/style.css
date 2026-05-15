@@ -1,93 +1,61 @@
-.training-page{
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:40px;
+.training-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
 }
 
-.training-container{
-  width:650px;
-  background:white;
-  padding:40px;
-
-  border-radius:16px;
-
-  display:flex;
-  flex-direction:column;
-  gap:25px;
-
-  box-shadow:0 20px 50px rgba(0,0,0,0.2);
+.training-container {
+  width: 650px;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-shadow: var(--shadow-card-lg);
 }
 
-.training-container h1{
-  text-align:center;
-  font-weight:600;
+.training-container h1 {
+  text-align: center;
+  font-weight: 600;
 }
 
-.form-section{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.form-section h2{
-  font-size:16px;
-  color:#555;
-  margin-bottom:5px;
+.form-section h2 {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 5px;
 }
 
-.training-container input,
-.training-container select,
-.training-container textarea{
-
-  padding:12px;
-
-  border-radius:8px;
-  border:1px solid #ddd;
-
-  font-size:14px;
+.training-container textarea {
+  padding: 12px;
+  border-radius: var(--radius-input);
+  border: 1px solid #ddd;
+  font-size: 14px;
+  font-family: var(--font-main);
+  height: 80px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.training-container textarea{
-  height:80px;
-  resize:none;
+.training-container textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-shadow);
 }
 
-.row{
-  display:flex;
-  gap:10px;
+.row {
+  display: flex;
+  gap: 10px;
 }
 
-.row input{
-  flex:1;
-}
-
-.save-btn{
-  margin-top:10px;
-
-  padding:12px;
-
-  border:none;
-  border-radius:8px;
-
-  background:linear-gradient(
-    135deg,
-    #6366f1,
-    #7c3aed
-  );
-
-  color:white;
-  font-weight:600;
-  font-size:14px;
-
-  cursor:pointer;
-  transition:.3s;
-
-  outline:none;
-}
-
-.save-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 6px 20px rgba(0,0,0,.2);
+.row .field {
+  flex: 1;
 }
