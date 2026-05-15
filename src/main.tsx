@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
 import CreateTraining from './pages/CreateTraining'
+import EditTraining from './pages/EditTraining'
 import StudentDashboard from './pages/StudentDashboard'
 import ProfessorDashboard from './pages/ProfessorDashboard'
 
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/dashboard/atleta" element={<StudentDashboard />} />
             <Route path="/dashboard/professor" element={<ProfessorDashboard />} />
             <Route path="/criar-treino" element={<CreateTraining />} />
+            <Route path="/editar-treino/:id" element={<EditTraining />} />
           </Route>
         </Routes>
       </AuthProvider>

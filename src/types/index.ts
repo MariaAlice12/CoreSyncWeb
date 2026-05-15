@@ -15,7 +15,7 @@ export interface TrainingPayload {
   modality: string
   hour: string
   address: string
-  weekday: string
+  weekdays: string[]
   description?: string
   maxStudents: number
   minStudents: number
@@ -36,7 +36,7 @@ export interface Training {
   modality: string
   hour: string
   address: string
-  weekday: string
+  weekdays: string[]
   description?: string
   active: boolean
   maxStudents: number
