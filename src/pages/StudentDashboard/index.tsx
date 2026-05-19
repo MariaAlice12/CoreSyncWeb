@@ -201,7 +201,7 @@ function StudentDashboard() {
   return (
     <div className="student-page">
       <header className="student-header">
-        <span className="student-header__brand">CodeSync</span>
+        <span className="student-header__brand">CoreSync</span>
         <nav className="student-nav">
           <button
             className={`student-nav__tab${tab === 'matricula' ? ' student-nav__tab--active' : ''}`}

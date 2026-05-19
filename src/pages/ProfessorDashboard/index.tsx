@@ -119,7 +119,7 @@ function ProfessorDashboard() {
   return (
     <div className="professor-page">
       <header className="professor-header">
-        <span className="professor-header__brand">CodeSync</span>
+        <span className="professor-header__brand">CoreSync</span>
         <nav className="professor-nav">
           <button
             className={`professor-nav__tab${tab === 'treinos' ? ' professor-nav__tab--active' : ''}`}

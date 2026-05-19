@@ -1,6 +1,6 @@
-const TOKEN_KEY = 'codesync_token'
-const ROLE_KEY = 'codesync_role'
-const USER_ID_KEY = 'codesync_user_id'
+const TOKEN_KEY = 'coresync_token'
+const ROLE_KEY = 'coresync_role'
+const USER_ID_KEY = 'coresync_user_id'
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY)
 export const setToken = (token: string): void => localStorage.setItem(TOKEN_KEY, token)

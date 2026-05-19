@@ -129,7 +129,7 @@ function AdminDashboard() {
   return (
     <div className="admin-page">
       <header className="admin-header">
-        <span className="admin-header__brand">CodeSync</span>
+        <span className="admin-header__brand">CoreSync</span>
         <nav className="admin-nav">
           {(['professores', 'atletas', 'treinos', 'eventos'] as Tab[]).map(t => (
             <button
