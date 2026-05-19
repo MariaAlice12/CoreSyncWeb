@@ -200,7 +200,7 @@ VITE_API_URL=http://localhost:3000
 
 ## Backend
 
-O CoreSync possui uma API REST separada que gerencia toda a lógica de negócio e persistência de dados. O link do repositório será disponibilizado em breve.
+O CoreSync possui uma API REST separada que gerencia toda a lógica de negócio e persistência de dados. Segue o link do repositório: https://github.com/MariaAlice12/CoreSync .
 
 ---
 
