@@ -184,16 +184,16 @@ VITE_API_URL=http://localhost:3000
 > Prints das principais telas da aplicação.
 
 <!-- Dashboard do Aluno -->
-Dashboard do Atleta
+# Dashboard do Atleta
 ![Print](dash_atleta.png)
 <!-- Dashboard do Professor -->
-Dashboard do Professor
+# Dashboard do Professor
 ![Print](dash_professor.png)
 <!-- Dashboard do Admin -->
-Dashboard do Administrador
+# Dashboard do Administrador
 ![Print](dash_admin.png)
 <!-- Tela de Criação de Treino -->
-Tela de Criação de Treino
+# Tela de Criação de Treino
 ![Print](form_criar-treino.png)
 
 ---
