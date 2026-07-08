@@ -208,6 +208,11 @@
   white-space: nowrap;
 }
 
+.admin-row__badge--warning {
+  color: #b45309;
+  background: #fef3c7;
+}
+
 .admin-row__actions {
   display: flex;
   gap: 8px;

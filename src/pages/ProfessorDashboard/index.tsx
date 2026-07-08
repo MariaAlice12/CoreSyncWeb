@@ -6,10 +6,11 @@ import { logout } from '../../services/auth.service'
 import { getTrainings, getAllEnrollments, deleteTraining, removeEnrollment } from '../../services/training.service'
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAllEventRegistrations, removeEventRegistration } from '../../services/eventRegistration.service'
-import type { Training, Enrollment, Event, EventRegistration } from '../../types'
+import { getProfessorPerformance } from '../../services/analytics.service'
+import type { Training, Enrollment, Event, EventRegistration, ProfessorPerformance } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
 
-type Tab = 'treinos' | 'alunos' | 'eventos'
+type Tab = 'treinos' | 'alunos' | 'eventos' | 'desempenho'
 
 const WEEKDAY_LABEL: Record<string, string> = {
   segunda: 'Segunda', terca: 'Terça', quarta: 'Quarta',
@@ -26,9 +27,11 @@ function ProfessorDashboard() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [eventRegs, setEventRegs] = useState<EventRegistration[]>([])
+  const [performance, setPerformance] = useState<ProfessorPerformance | null>(null)
   const [loadingTrainings, setLoadingTrainings] = useState(true)
   const [loadingEnrollments, setLoadingEnrollments] = useState(true)
   const [loadingEvents, setLoadingEvents] = useState(true)
+  const [loadingPerformance, setLoadingPerformance] = useState(true)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmEnrollmentId, setConfirmEnrollmentId] = useState<number | null>(null)
@@ -55,6 +58,11 @@ function ProfessorDashboard() {
         setEventRegs(regs)
       })
       .finally(() => setLoadingEvents(false))
+
+    getProfessorPerformance()
+      .then(setPerformance)
+      .catch(() => setError('Não foi possível carregar o desempenho'))
+      .finally(() => setLoadingPerformance(false))
   }, [])
 
   function handleLogout() {
@@ -138,6 +146,12 @@ function ProfessorDashboard() {
             onClick={() => setTab('eventos')}
           >
             Eventos
+          </button>
+          <button
+            className={`professor-nav__tab${tab === 'desempenho' ? ' professor-nav__tab--active' : ''}`}
+            onClick={() => setTab('desempenho')}
+          >
+            Desempenho
           </button>
         </nav>
         <div className="professor-header__actions">
@@ -332,6 +346,49 @@ function ProfessorDashboard() {
                 )
               })}
             </div>
+          </>
+        )}
+
+        {tab === 'desempenho' && (
+          <>
+            <h2 className="section-title">Desempenho</h2>
+            {loadingPerformance && <p className="empty-state">Carregando...</p>}
+            {!loadingPerformance && performance && performance.trainings.length === 0 && (
+              <p className="empty-state">Nenhum treino atribuído ainda.</p>
+            )}
+            {!loadingPerformance && performance && performance.trainings.length > 0 && (
+              <>
+                <div className="modality-card" style={{ marginBottom: 20 }}>
+                  <div className="modality-card__header">
+                    <div className="modality-card__title-group">
+                      <span className="modality-card__name">Resumo geral</span>
+                      <span className="modality-card__meta">
+                        {performance.totals.totalActiveStudents} alunos ativos · {performance.totals.trainingsBelowMinimum} treino(s) abaixo do mínimo
+                        {performance.totals.overallAvgRating !== null && ` · ★ ${performance.totals.overallAvgRating.toFixed(1)} média geral`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="modality-list">
+                  {performance.trainings.map(row => (
+                    <div key={row.trainingId} className="modality-card">
+                      <div className="modality-card__header">
+                        <div className="modality-card__title-group">
+                          <span className="modality-card__name">{row.modality}</span>
+                          <span className="modality-card__meta">
+                            {row.activeCount}/{row.maxStudents} alunos ({row.occupancyPct}%) · {row.inactiveCount} evadidos
+                            {row.belowMinimum && ' · abaixo do mínimo'}
+                          </span>
+                        </div>
+                        <span className="modality-card__count">
+                          {row.responseCount > 0 ? `★ ${row.avgRating?.toFixed(1)} (${row.responseCount} avaliações)` : 'Sem avaliações ainda'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

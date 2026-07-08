@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './style.css'
 import Input from '../../components/Input'
@@ -6,7 +6,9 @@ import Select from '../../components/Select'
 import Button from '../../components/Button'
 import useForm from '../../hooks/useForm'
 import { createTraining } from '../../services/training.service'
-import type { TrainingPayload } from '../../types'
+import { getUsers } from '../../services/user.service'
+import { useAuth } from '../../contexts/AuthContext'
+import type { TrainingPayload, User } from '../../types'
 
 const MODALIDADE_OPTIONS = [
   { value: 'atletismo', label: 'Atletismo' },
@@ -33,14 +35,23 @@ const INITIAL = {
   description: '',
   maxStudents: '',
   minStudents: '',
+  professorId: '',
 }
 
 function CreateTraining() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [weekdays, setWeekdays] = useState<string[]>([])
+  const [professors, setProfessors] = useState<User[]>([])
   const navigate = useNavigate()
+  const { userRole } = useAuth()
   const { values, handleChange } = useForm(INITIAL)
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      getUsers().then(users => setProfessors(users.filter(u => u.userType === 'professor')))
+    }
+  }, [userRole])
 
   function toggleDay(day: string) {
     setWeekdays(prev =>
@@ -54,6 +65,10 @@ function CreateTraining() {
       setError('Selecione ao menos um dia da semana')
       return
     }
+    if (userRole === 'admin' && !values.professorId) {
+      setError('Selecione o professor responsável')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -65,6 +80,7 @@ function CreateTraining() {
         description: values.description || undefined,
         maxStudents: Number(values.maxStudents),
         minStudents: Number(values.minStudents),
+        ...(userRole === 'admin' ? { professorId: Number(values.professorId) } : {}),
       }
       await createTraining(payload)
       navigate('/dashboard')
@@ -83,6 +99,15 @@ function CreateTraining() {
         <div className="form-section">
           <h2>Informações do Treino</h2>
           <Select name="modality" placeholder="Modalidade" options={MODALIDADE_OPTIONS} value={values.modality} onChange={handleChange} />
+          {userRole === 'admin' && (
+            <Select
+              name="professorId"
+              placeholder="Professor responsável"
+              options={professors.map(p => ({ value: String(p.id), label: p.name }))}
+              value={values.professorId}
+              onChange={handleChange}
+            />
+          )}
           <textarea
             name="description"
             placeholder="Descrição do treino (opcional)"

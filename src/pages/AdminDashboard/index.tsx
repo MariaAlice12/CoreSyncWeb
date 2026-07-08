@@ -6,16 +6,27 @@ import { logout } from '../../services/auth.service'
 import { getUsers, deleteUser, updateUser } from '../../services/user.service'
 import { getTrainings, deleteTraining } from '../../services/training.service'
 import { getEvents, deleteEvent } from '../../services/event.service'
-import type { User, Training, Event } from '../../types'
+import { getAdminOverview } from '../../services/analytics.service'
+import type { User, Training, Event, AdminOverview } from '../../types'
 
-type Tab = 'professores' | 'atletas' | 'treinos' | 'eventos'
+type Tab = 'professores' | 'atletas' | 'treinos' | 'eventos' | 'insights'
+
+const TAB_LABEL: Record<Tab, string> = {
+  professores: 'Professores',
+  atletas: 'Atletas',
+  treinos: 'Treinos',
+  eventos: 'Eventos',
+  insights: 'Insights',
+}
 
 function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('professores')
   const [users, setUsers] = useState<User[]>([])
   const [trainings, setTrainings] = useState<Training[]>([])
   const [events, setEvents] = useState<Event[]>([])
+  const [overview, setOverview] = useState<AdminOverview | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingOverview, setLoadingOverview] = useState(true)
   const [error, setError] = useState('')
   const [confirmDeleteUser, setConfirmDeleteUser] = useState<number | null>(null)
   const [confirmDeleteTraining, setConfirmDeleteTraining] = useState<number | null>(null)
@@ -35,6 +46,11 @@ function AdminDashboard() {
       })
       .catch(() => setError('Não foi possível carregar os dados'))
       .finally(() => setLoading(false))
+
+    getAdminOverview()
+      .then(setOverview)
+      .catch(() => setError('Não foi possível carregar os insights'))
+      .finally(() => setLoadingOverview(false))
   }, [])
 
   function handleLogout() {
@@ -131,13 +147,13 @@ function AdminDashboard() {
       <header className="admin-header">
         <span className="admin-header__brand">CoreSync</span>
         <nav className="admin-nav">
-          {(['professores', 'atletas', 'treinos', 'eventos'] as Tab[]).map(t => (
+          {(['professores', 'atletas', 'treinos', 'eventos', 'insights'] as Tab[]).map(t => (
             <button
               key={t}
               className={`admin-nav__tab${tab === t ? ' admin-nav__tab--active' : ''}`}
               onClick={() => setTab(t)}
             >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {TAB_LABEL[t]}
             </button>
           ))}
         </nav>
@@ -218,6 +234,44 @@ function AdminDashboard() {
                 </div>
               ))}
             </div>
+          </>
+        )}
+
+        {tab === 'insights' && (
+          <>
+            <h2 className="section-title">Visão Geral</h2>
+            {loadingOverview && <p className="empty-state">Carregando...</p>}
+            {!loadingOverview && overview && overview.trainings.length === 0 && (
+              <p className="empty-state">Nenhum treino cadastrado ainda.</p>
+            )}
+            {!loadingOverview && overview && overview.trainings.length > 0 && (
+              <>
+                <div className="admin-row" style={{ marginBottom: 20 }}>
+                  <div className="admin-row__info">
+                    <span className="admin-row__name">Resumo</span>
+                    <span className="admin-row__meta">
+                      {overview.totals.totalActiveStudents} alunos ativos · {overview.totals.totalTrainings} treinos · {overview.totals.trainingsBelowMinimum} abaixo do mínimo
+                    </span>
+                  </div>
+                </div>
+                <div className="admin-list">
+                  {overview.trainings.map(row => (
+                    <div key={row.trainingId} className="admin-row">
+                      <div className="admin-row__info">
+                        <span className="admin-row__name">{row.modality}</span>
+                        <span className="admin-row__meta">
+                          Professor: {row.professor?.name ?? 'Não atribuído'} · {row.activeCount}/{row.maxStudents} alunos ({row.occupancyPct}%)
+                          {row.responseCount > 0 && ` · ★ ${row.avgRating?.toFixed(1)} (${row.responseCount} avaliações)`}
+                        </span>
+                      </div>
+                      {row.belowMinimum && (
+                        <span className="admin-row__badge admin-row__badge--warning">Abaixo do mínimo</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

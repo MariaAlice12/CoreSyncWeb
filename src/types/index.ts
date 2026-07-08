@@ -19,6 +19,7 @@ export interface TrainingPayload {
   description?: string
   maxStudents: number
   minStudents: number
+  professorId?: number
 }
 
 export interface EventPayload {
@@ -49,6 +50,7 @@ export interface Training {
   active: boolean
   maxStudents: number
   minStudents: number
+  professor?: { id: number; name: string; email: string } | null
 }
 
 export interface Enrollment {
@@ -88,6 +90,49 @@ export interface User {
   email: string
   telephone: string
   userType: 'aluno' | 'professor' | 'admin'
+}
+
+export interface SurveyResponse {
+  id: number
+  training: Training
+  user: { id: number; name: string }
+  rating: number
+  comment?: string
+  createdAt: string
+}
+
+export interface TrainingAnalyticsRow {
+  trainingId: number
+  modality: string
+  professor: { id: number; name: string } | null
+  activeCount: number
+  inactiveCount: number
+  maxStudents: number
+  minStudents: number
+  occupancyPct: number
+  belowMinimum: boolean
+  avgRating: number | null
+  responseCount: number
+}
+
+export interface AdminOverview {
+  trainings: TrainingAnalyticsRow[]
+  totals: {
+    totalTrainings: number
+    totalActiveStudents: number
+    trainingsBelowMinimum: number
+  }
+}
+
+export interface ProfessorPerformance {
+  professorId: number
+  trainings: TrainingAnalyticsRow[]
+  totals: {
+    totalTrainings: number
+    totalActiveStudents: number
+    trainingsBelowMinimum: number
+    overallAvgRating: number | null
+  }
 }
 
 export interface StravaActivity {

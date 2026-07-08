@@ -5,7 +5,9 @@ import Input from '../../components/Input'
 import Select from '../../components/Select'
 import Button from '../../components/Button'
 import { getTrainingById, updateTraining } from '../../services/training.service'
-import type { TrainingPayload } from '../../types'
+import { getUsers } from '../../services/user.service'
+import { useAuth } from '../../contexts/AuthContext'
+import type { TrainingPayload, User } from '../../types'
 
 const MODALIDADE_OPTIONS = [
   { value: 'atletismo', label: 'Atletismo' },
@@ -39,6 +41,9 @@ function EditTraining() {
   const [description, setDescription] = useState('')
   const [maxStudents, setMaxStudents] = useState('')
   const [minStudents, setMinStudents] = useState('')
+  const [professorId, setProfessorId] = useState('')
+  const [professors, setProfessors] = useState<User[]>([])
+  const { userRole } = useAuth()
 
   useEffect(() => {
     if (!id) return
@@ -51,10 +56,17 @@ function EditTraining() {
         setDescription(t.description ?? '')
         setMaxStudents(String(t.maxStudents))
         setMinStudents(String(t.minStudents))
+        setProfessorId(t.professor ? String(t.professor.id) : '')
       })
       .catch(() => setError('Não foi possível carregar o treino'))
       .finally(() => setLoadingData(false))
   }, [id])
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      getUsers().then(users => setProfessors(users.filter(u => u.userType === 'professor')))
+    }
+  }, [userRole])
 
   function toggleDay(day: string) {
     setWeekdays(prev =>
@@ -79,6 +91,7 @@ function EditTraining() {
         description: description || undefined,
         maxStudents: Number(maxStudents),
         minStudents: Number(minStudents),
+        ...(userRole === 'admin' && professorId ? { professorId: Number(professorId) } : {}),
       }
       await updateTraining(Number(id), payload)
       navigate('/dashboard/professor')
@@ -111,6 +124,15 @@ function EditTraining() {
             value={modality}
             onChange={e => setModality(e.target.value)}
           />
+          {userRole === 'admin' && (
+            <Select
+              name="professorId"
+              placeholder="Professor responsável"
+              options={professors.map(p => ({ value: String(p.id), label: p.name }))}
+              value={professorId}
+              onChange={e => setProfessorId(e.target.value)}
+            />
+          )}
           <textarea
             name="description"
             placeholder="Descrição do treino (opcional)"
