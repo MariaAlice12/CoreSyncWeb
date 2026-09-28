@@ -29,7 +29,7 @@ function CreateEvent() {
         title: values.title,
         description: values.description,
         image: values.image || undefined,
-        date: values.date || undefined,
+        date: values.date,
         bracketGenerated,
       }
       await createEvent(payload)

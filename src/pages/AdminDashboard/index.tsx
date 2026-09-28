@@ -28,6 +28,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [loadingOverview, setLoadingOverview] = useState(true)
   const [error, setError] = useState('')
+  const [overviewError, setOverviewError] = useState('')
   const [confirmDeleteUser, setConfirmDeleteUser] = useState<number | null>(null)
   const [confirmDeleteTraining, setConfirmDeleteTraining] = useState<number | null>(null)
   const [confirmDeleteEvent, setConfirmDeleteEvent] = useState<number | null>(null)
@@ -46,12 +47,22 @@ function AdminDashboard() {
       })
       .catch(() => setError('Não foi possível carregar os dados'))
       .finally(() => setLoading(false))
+  }, [])
 
+  // Recarrega a cada abertura da aba para refletir exclusões e alterações
+  // feitas no painel desde o último carregamento.
+  useEffect(() => {
+    if (tab !== 'insights') return
+    setLoadingOverview(true)
+    setOverviewError('')
     getAdminOverview()
       .then(setOverview)
-      .catch(() => setError('Não foi possível carregar os insights'))
+      .catch(() => {
+        setOverview(null)
+        setOverviewError('Não foi possível carregar os insights')
+      })
       .finally(() => setLoadingOverview(false))
-  }, [])
+  }, [tab])
 
   function handleLogout() {
     logout()
@@ -241,6 +252,7 @@ function AdminDashboard() {
           <>
             <h2 className="section-title">Visão Geral</h2>
             {loadingOverview && <p className="empty-state">Carregando...</p>}
+            {!loadingOverview && overviewError && <p className="empty-state error">{overviewError}</p>}
             {!loadingOverview && overview && overview.trainings.length === 0 && (
               <p className="empty-state">Nenhum treino cadastrado ainda.</p>
             )}
