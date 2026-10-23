@@ -22,5 +22,13 @@ export const TOOLTIP = {
   itemStyle: { color: '#444' },
 } as const
 
+/** Legenda: o ícone carrega a cor da série; o texto fica na cor de texto. */
+export const LEGEND = {
+  iconType: 'square',
+  iconSize: 10,
+  wrapperStyle: { fontSize: 12 },
+  formatter: (value: string) => <span style={{ color: '#555' }}>{value}</span>,
+} as const
+
 /** Cantos arredondados só na ponta da barra (a base fica no eixo). */
 export const BAR_RADIUS: [number, number, number, number] = [4, 4, 0, 0]

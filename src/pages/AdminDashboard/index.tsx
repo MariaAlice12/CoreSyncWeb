@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './style.css'
 import NotificationBell from '../../components/NotificationBell'
+import SegmentationPanel from '../../components/SegmentationPanel'
 import { useAuth } from '../../contexts/AuthContext'
 import { logout } from '../../services/auth.service'
 import { getUsers, deleteUser, updateUser } from '../../services/user.service'
@@ -272,7 +273,10 @@ function AdminDashboard() {
 
         {tab === 'insights' && (
           <>
-            <h2 className="section-title">Visão Geral</h2>
+            <h2 className="section-title">Participação segmentada</h2>
+            {!loading && <SegmentationPanel trainings={trainings} users={users} />}
+
+            <h2 className="section-title">Visão Geral dos Treinos</h2>
             {loadingOverview && <p className="empty-state">Carregando...</p>}
             {!loadingOverview && overviewError && <p className="empty-state error">{overviewError}</p>}
             {!loadingOverview && overview && overview.trainings.length === 0 && (
