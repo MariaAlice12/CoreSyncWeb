@@ -1,0 +1,65 @@
+.strava-connect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: white;
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  margin-bottom: 20px;
+}
+
+.strava-connect__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.strava-connect__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+.strava-connect__text {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Laranja da marca Strava, usado apenas no botão de conexão */
+.strava-connect__btn {
+  border: none;
+  border-radius: var(--radius-input);
+  background: #fc4c02;
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+}
+
+.strava-connect__btn:hover:not(:disabled) {
+  background: #e34402;
+}
+
+.strava-connect__btn--secondary {
+  background: none;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.strava-connect__btn--secondary:hover:not(:disabled) {
+  background: none;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.strava-connect__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -11,6 +11,7 @@ import { getProfessorPerformance } from '../../services/analytics.service'
 import { LEVEL_LABELS, type Training, type Enrollment, type Event, type EventRegistration, type ProfessorPerformance } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
 import TrainingAttendance from '../../components/TrainingAttendance'
+import AthletePerformanceView from '../../components/AthletePerformanceView'
 
 type Tab = 'treinos' | 'alunos' | 'presencas' | 'eventos' | 'desempenho'
 
@@ -41,6 +42,7 @@ function ProfessorDashboard() {
   const [confirmDeleteEvent, setConfirmDeleteEvent] = useState<number | null>(null)
   const [bracketOpenId, setBracketOpenId] = useState<number | null>(null)
   const [attendanceTrainingId, setAttendanceTrainingId] = useState<number | null>(null)
+  const [viewAthlete, setViewAthlete] = useState<{ id: number; name: string } | null>(null)
   const { signOut, userId } = useAuth()
   const navigate = useNavigate()
 
@@ -264,6 +266,12 @@ function ProfessorDashboard() {
                               <span className="student-item__email">{e.user.email}</span>
                             </div>
                             <button
+                              className="row-btn row-btn--edit"
+                              onClick={() => setViewAthlete({ id: e.user.id, name: e.user.name })}
+                            >
+                              Desempenho
+                            </button>
+                            <button
                               className="student-item__remove"
                               disabled={deletingEnrollmentId === e.id}
                               onClick={() => setConfirmEnrollmentId(e.id)}
@@ -437,6 +445,23 @@ function ProfessorDashboard() {
           </>
         )}
       </main>
+
+      {viewAthlete && (
+        <div className="confirm-overlay" onClick={() => setViewAthlete(null)}>
+          <div
+            className="performance-modal"
+            role="dialog"
+            aria-label={`Desempenho de ${viewAthlete.name}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="performance-modal__header">
+              <h2 className="section-title">Desempenho · {viewAthlete.name}</h2>
+              <button className="performance-modal__close" aria-label="Fechar" onClick={() => setViewAthlete(null)}>×</button>
+            </div>
+            <AthletePerformanceView athleteId={viewAthlete.id} />
+          </div>
+        </div>
+      )}
 
       {deletingId !== null && (
         <div className="confirm-overlay">

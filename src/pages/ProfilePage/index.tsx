@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import './style.css'
 import { useAuth } from '../../contexts/AuthContext'
 import { getUserById, updateUser } from '../../services/user.service'
+import StravaConnect from '../../components/StravaConnect'
 import { SHIFT_LABELS, type Shift, type User } from '../../types'
+
+// Retorno do OAuth do Strava (?strava=...)
+const STRAVA_FEEDBACK: Record<string, { ok: boolean; text: string }> = {
+  connected: { ok: true, text: 'Conta do Strava conectada! Sincronize suas atividades na aba Desempenho.' },
+  denied: { ok: false, text: 'A conexão com o Strava foi cancelada.' },
+  error: { ok: false, text: 'Não foi possível conectar ao Strava. Tente novamente.' },
+}
 
 function ProfilePage() {
   const { userId } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const stravaFeedback = STRAVA_FEEDBACK[searchParams.get('strava') ?? '']
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -86,6 +96,12 @@ function ProfilePage() {
             <span className="profile-role">{ROLE_LABEL[user?.userType ?? ''] ?? user?.userType}</span>
           </div>
         </div>
+
+        {stravaFeedback && (
+          <p className={stravaFeedback.ok ? 'form-success' : 'form-error'}>{stravaFeedback.text}</p>
+        )}
+
+        {user?.userType === 'aluno' && <StravaConnect />}
 
         <form className="profile-form" onSubmit={handleSubmit}>
           <h2 className="profile-form__title">Editar Perfil</h2>

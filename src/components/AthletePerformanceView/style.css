@@ -1,0 +1,112 @@
+.strava-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.strava-card {
+  background: white;
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.strava-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.strava-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+.strava-card__type {
+  font-size: 11px;
+  font-weight: 600;
+  background: #fff3ed;
+  color: #fc4c02;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.strava-card__stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.strava-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.strava-stat__value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+
+.strava-stat__label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.strava-card__date {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.strava-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.strava-card__link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fc4c02;
+  text-decoration: none;
+}
+
+.strava-card__link:hover {
+  text-decoration: underline;
+}
+
+.performance__subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 8px 0 12px;
+}
+
+.performance__modalities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.performance__modality {
+  font-size: 13px;
+  color: #555;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-transform: capitalize;
+}

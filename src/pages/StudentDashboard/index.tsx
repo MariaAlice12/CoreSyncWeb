@@ -6,10 +6,12 @@ import { logout } from '../../services/auth.service'
 import { getTrainings, enrollInTraining, getMyEnrollments, updateEnrollment } from '../../services/training.service'
 import { getEvents } from '../../services/event.service'
 import { getAllEventRegistrations, registerInEvent, updateEventRegistration } from '../../services/eventRegistration.service'
-import { getStravaActivities, syncStravaActivities } from '../../services/strava.service'
+import { syncStravaActivities } from '../../services/strava.service'
+import StravaConnect from '../../components/StravaConnect'
+import AthletePerformanceView from '../../components/AthletePerformanceView'
 import { getMyAttendances } from '../../services/attendance.service'
 import AttendanceSessions from '../../components/AttendanceSessions'
-import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration, type StravaActivity } from '../../types'
+import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration } from '../../types'
 import { useNavigate } from 'react-router-dom'
 
 type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
@@ -17,13 +19,6 @@ type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
 const WEEKDAY_LABEL: Record<string, string> = {
   segunda: 'Segunda', terca: 'Terça', quarta: 'Quarta',
   quinta: 'Quinta', sexta: 'Sexta', sabado: 'Sábado', domingo: 'Domingo',
-}
-
-function formatSeconds(s: number) {
-  const m = Math.floor(s / 60)
-  const h = Math.floor(m / 60)
-  if (h > 0) return `${h}h ${m % 60}min`
-  return `${m}min`
 }
 
 function TrainingCard({ training, action, children }: { training: Training; action: React.ReactNode; children?: React.ReactNode }) {
@@ -72,13 +67,14 @@ function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [eventRegs, setEventRegs] = useState<EventRegistration[]>([])
-  const [stravaActivities, setStravaActivities] = useState<StravaActivity[]>([])
   const [myAttendances, setMyAttendances] = useState<Attendance[]>([])
   const [loadingAvailable, setLoadingAvailable] = useState(true)
   const [loadingEnrolled, setLoadingEnrolled] = useState(true)
   const [loadingEvents, setLoadingEvents] = useState(true)
-  const [loadingStrava, setLoadingStrava] = useState(false)
   const [syncingStrava, setSyncingStrava] = useState(false)
+  const [syncError, setSyncError] = useState('')
+  const [stravaConnected, setStravaConnected] = useState(false)
+  const [performanceVersion, setPerformanceVersion] = useState(0)
   const [enrollingId, setEnrollingId] = useState<number | null>(null)
   const [confirmUnenrollId, setConfirmUnenrollId] = useState<number | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
@@ -116,14 +112,6 @@ function StudentDashboard() {
       })
       .finally(() => setLoadingEvents(false))
   }, [])
-
-  useEffect(() => {
-    if (tab !== 'strava' || stravaActivities.length > 0) return
-    setLoadingStrava(true)
-    getStravaActivities()
-      .then(setStravaActivities)
-      .finally(() => setLoadingStrava(false))
-  }, [tab])
 
   async function handleEnroll(trainingId: number) {
     if (!userId) return
@@ -193,9 +181,12 @@ function StudentDashboard() {
 
   async function handleSyncStrava() {
     setSyncingStrava(true)
+    setSyncError('')
     try {
-      const activities = await syncStravaActivities()
-      setStravaActivities(activities)
+      await syncStravaActivities()
+      setPerformanceVersion(v => v + 1)
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : 'Não foi possível sincronizar com o Strava')
     } finally {
       setSyncingStrava(false)
     }
@@ -258,7 +249,7 @@ function StudentDashboard() {
             className={`student-nav__tab${tab === 'strava' ? ' student-nav__tab--active' : ''}`}
             onClick={() => setTab('strava')}
           >
-            Strava
+            Desempenho
           </button>
         </nav>
         <button className="student-header__profile" onClick={() => navigate('/agenda')}>Agenda</button>
@@ -429,48 +420,16 @@ function StudentDashboard() {
         {tab === 'strava' && (
           <>
             <div className="strava-header">
-              <h2 className="section-title">Atividades Strava</h2>
-              <button className="sync-btn" disabled={syncingStrava} onClick={handleSyncStrava}>
-                {syncingStrava ? 'Sincronizando...' : 'Sincronizar'}
-              </button>
+              <h2 className="section-title">Meu Desempenho</h2>
+              {stravaConnected && (
+                <button className="sync-btn" disabled={syncingStrava} onClick={handleSyncStrava}>
+                  {syncingStrava ? 'Sincronizando...' : 'Sincronizar Strava'}
+                </button>
+              )}
             </div>
-            {loadingStrava && <p className="empty-state">Carregando...</p>}
-            {!loadingStrava && stravaActivities.length === 0 && (
-              <p className="empty-state">Nenhuma atividade encontrada. Clique em Sincronizar para buscar do Strava.</p>
-            )}
-            <div className="strava-list">
-              {stravaActivities.map(a => (
-                <div key={a.id} className="strava-card">
-                  <div className="strava-card__header">
-                    <span className="strava-card__name">{a.name}</span>
-                    <span className="strava-card__type">{a.sportType ?? a.type}</span>
-                  </div>
-                  <div className="strava-card__stats">
-                    <div className="strava-stat">
-                      <span className="strava-stat__value">{(a.distance / 1000).toFixed(2)}</span>
-                      <span className="strava-stat__label">km</span>
-                    </div>
-                    <div className="strava-stat">
-                      <span className="strava-stat__value">{formatSeconds(a.movingTime)}</span>
-                      <span className="strava-stat__label">tempo</span>
-                    </div>
-                    {a.averageSpeed && (
-                      <div className="strava-stat">
-                        <span className="strava-stat__value">{(a.averageSpeed * 3.6).toFixed(1)}</span>
-                        <span className="strava-stat__label">km/h</span>
-                      </div>
-                    )}
-                    <div className="strava-stat">
-                      <span className="strava-stat__value">{a.totalElevationGain.toFixed(0)}</span>
-                      <span className="strava-stat__label">m ganho</span>
-                    </div>
-                  </div>
-                  <span className="strava-card__date">
-                    {new Date(a.startDate).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <StravaConnect onStatusChange={s => setStravaConnected(s.connected)} />
+            {syncError && <p className="empty-state error">{syncError}</p>}
+            {userId && <AthletePerformanceView key={performanceVersion} athleteId={userId} />}
           </>
         )}
       </main>
