@@ -10,8 +10,9 @@ import { getAllEventRegistrations, removeEventRegistration } from '../../service
 import { getProfessorPerformance } from '../../services/analytics.service'
 import { LEVEL_LABELS, type Training, type Enrollment, type Event, type EventRegistration, type ProfessorPerformance } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
+import TrainingAttendance from '../../components/TrainingAttendance'
 
-type Tab = 'treinos' | 'alunos' | 'eventos' | 'desempenho'
+type Tab = 'treinos' | 'alunos' | 'presencas' | 'eventos' | 'desempenho'
 
 const WEEKDAY_LABEL: Record<string, string> = {
   segunda: 'Segunda', terca: 'Terça', quarta: 'Quarta',
@@ -39,7 +40,8 @@ function ProfessorDashboard() {
   const [deletingEnrollmentId, setDeletingEnrollmentId] = useState<number | null>(null)
   const [confirmDeleteEvent, setConfirmDeleteEvent] = useState<number | null>(null)
   const [bracketOpenId, setBracketOpenId] = useState<number | null>(null)
-  const { signOut } = useAuth()
+  const [attendanceTrainingId, setAttendanceTrainingId] = useState<number | null>(null)
+  const { signOut, userId } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -125,6 +127,10 @@ function ProfessorDashboard() {
     return acc
   }, {})
 
+  const myTrainings = trainings.filter(t => t.professor?.id === userId)
+  const attendanceTraining =
+    myTrainings.find(t => t.id === attendanceTrainingId) ?? myTrainings[0]
+
   return (
     <div className="professor-page">
       <header className="professor-header">
@@ -141,6 +147,12 @@ function ProfessorDashboard() {
             onClick={() => setTab('alunos')}
           >
             Alunos
+          </button>
+          <button
+            className={`professor-nav__tab${tab === 'presencas' ? ' professor-nav__tab--active' : ''}`}
+            onClick={() => setTab('presencas')}
+          >
+            Presenças
           </button>
           <button
             className={`professor-nav__tab${tab === 'eventos' ? ' professor-nav__tab--active' : ''}`}
@@ -266,6 +278,35 @@ function ProfessorDashboard() {
                 )
               })}
             </div>
+          </>
+        )}
+
+        {tab === 'presencas' && (
+          <>
+            <h2 className="section-title">Presenças</h2>
+            {loadingTrainings && <p className="empty-state">Carregando...</p>}
+            {!loadingTrainings && myTrainings.length === 0 && (
+              <p className="empty-state">Você ainda não é responsável por nenhum treino.</p>
+            )}
+            {attendanceTraining && (
+              <>
+                <div className="filter-bar">
+                  <select
+                    className="filter-bar__select"
+                    aria-label="Treino"
+                    value={attendanceTraining.id}
+                    onChange={e => setAttendanceTrainingId(Number(e.target.value))}
+                  >
+                    {myTrainings.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.modality} · {formatWeekdays(t.weekdays)} · {t.hour}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <TrainingAttendance key={attendanceTraining.id} training={attendanceTraining} />
+              </>
+            )}
           </>
         )}
 

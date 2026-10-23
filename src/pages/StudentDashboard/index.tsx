@@ -7,7 +7,9 @@ import { getTrainings, enrollInTraining, getMyEnrollments, updateEnrollment } fr
 import { getEvents } from '../../services/event.service'
 import { getAllEventRegistrations, registerInEvent, updateEventRegistration } from '../../services/eventRegistration.service'
 import { getStravaActivities, syncStravaActivities } from '../../services/strava.service'
-import { LEVEL_LABELS, type Training, type Enrollment, type Event, type EventRegistration, type StravaActivity } from '../../types'
+import { getMyAttendances } from '../../services/attendance.service'
+import AttendanceSessions from '../../components/AttendanceSessions'
+import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration, type StravaActivity } from '../../types'
 import { useNavigate } from 'react-router-dom'
 
 type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
@@ -24,7 +26,7 @@ function formatSeconds(s: number) {
   return `${m}min`
 }
 
-function TrainingCard({ training, action }: { training: Training; action: React.ReactNode }) {
+function TrainingCard({ training, action, children }: { training: Training; action: React.ReactNode; children?: React.ReactNode }) {
   return (
     <div className="training-card">
       <div className="training-card__heading">
@@ -41,6 +43,7 @@ function TrainingCard({ training, action }: { training: Training; action: React.
       {training.description && <p className="training-card__detail">{training.description}</p>}
       <p className="training-card__detail">Vagas: {training.maxStudents}</p>
       <div className="training-card__actions">{action}</div>
+      {children}
     </div>
   )
 }
@@ -70,6 +73,7 @@ function StudentDashboard() {
   const [events, setEvents] = useState<Event[]>([])
   const [eventRegs, setEventRegs] = useState<EventRegistration[]>([])
   const [stravaActivities, setStravaActivities] = useState<StravaActivity[]>([])
+  const [myAttendances, setMyAttendances] = useState<Attendance[]>([])
   const [loadingAvailable, setLoadingAvailable] = useState(true)
   const [loadingEnrolled, setLoadingEnrolled] = useState(true)
   const [loadingEvents, setLoadingEvents] = useState(true)
@@ -98,6 +102,10 @@ function StudentDashboard() {
       .then(setEnrollments)
       .catch(() => setErrorEnrolled('Não foi possível carregar suas matrículas'))
       .finally(() => setLoadingEnrolled(false))
+  }, [])
+
+  useEffect(() => {
+    getMyAttendances().then(setMyAttendances).catch(() => setMyAttendances([]))
   }, [])
 
   useEffect(() => {
@@ -325,7 +333,14 @@ function StudentDashboard() {
                       {togglingId === e.id ? 'Aguarde...' : 'Cancelar matrícula'}
                     </button>
                   }
-                />
+                >
+                  <AttendanceSessions
+                    training={e.training}
+                    mine={myAttendances.filter(a => a.training?.id === e.training.id)}
+                    onConfirmed={a => setMyAttendances(prev => [a, ...prev])}
+                    onCancelled={id => setMyAttendances(prev => prev.filter(a => a.id !== id))}
+                  />
+                </TrainingCard>
               ))}
             </div>
           </>
