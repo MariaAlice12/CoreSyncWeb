@@ -56,7 +56,7 @@ function TrainingAttendance({ training }: { training: Training }) {
         </div>
       </div>
 
-      {chartData.length === 0 ? (
+      {rate.sessions.every(s => s.present === 0) ? (
         <p className="empty-state">Ainda não há presenças registradas nas últimas semanas.</p>
       ) : (
         <ChartCard

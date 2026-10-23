@@ -127,7 +127,7 @@ function AthletePerformanceView({ athleteId }: { athleteId: number }) {
         <div className="performance__modalities">
           {data.attendanceByModality.map(m => (
             <span key={m.modality} className="performance__modality">
-              {m.modality}: <strong>{m.count}</strong> {m.count === 1 ? 'presença' : 'presenças'}
+              <span className="performance__modality-name">{m.modality}</span>: <strong>{m.count}</strong> {m.count === 1 ? 'presença' : 'presenças'}
             </span>
           ))}
         </div>

@@ -210,3 +210,67 @@
   color: #444;
   min-width: 180px;
 }
+
+/* Impede que a margem do conteúdo vaze para fora da página e mostre o
+   fundo em gradiente do body (definido na Home) no fim das telas longas. */
+.student-page,
+.professor-page,
+.admin-page,
+.agenda-page {
+  display: flow-root;
+}
+
+/* Painéis em telas pequenas: marca e ações na primeira linha, abas roláveis
+   na segunda. Seletores prefixados pela página para vencer o CSS de cada tela. */
+@media (max-width: 900px) {
+  .student-page .student-header,
+  .professor-page .professor-header,
+  .admin-page .admin-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 12px 16px;
+    row-gap: 10px;
+  }
+
+  .student-page .student-nav,
+  .professor-page .professor-nav,
+  .admin-page .admin-nav {
+    order: 10;
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .student-page .student-nav > button,
+  .professor-page .professor-nav > button,
+  .admin-page .admin-nav > button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .professor-page .professor-header__actions,
+  .admin-page .admin-header__actions {
+    order: 11;
+  }
+
+  .student-page .student-content,
+  .professor-page .professor-content,
+  .admin-page .admin-content {
+    padding: 0 16px;
+    margin: 20px auto;
+  }
+
+  .professor-page .training-row,
+  .professor-page .modality-card__header,
+  .admin-page .admin-row,
+  .admin-page .admin-user-row {
+    flex-wrap: wrap;
+  }
+
+  .professor-page .training-row__info,
+  .admin-page .admin-row__info,
+  .admin-page .admin-user-info {
+    flex: 1 1 100%;
+  }
+}
