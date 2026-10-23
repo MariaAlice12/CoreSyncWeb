@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './style.css'
+import NotificationBell from '../../components/NotificationBell'
 import { useAuth } from '../../contexts/AuthContext'
 import { logout } from '../../services/auth.service'
 import { getTrainings, getAllEnrollments, deleteTraining, removeEnrollment } from '../../services/training.service'
@@ -166,6 +167,7 @@ function ProfessorDashboard() {
             </button>
           )}
         </div>
+        <NotificationBell />
         <button className="professor-header__profile" onClick={() => navigate('/perfil')}>Perfil</button>
         <button className="professor-header__logout" onClick={handleLogout}>Sair</button>
       </header>

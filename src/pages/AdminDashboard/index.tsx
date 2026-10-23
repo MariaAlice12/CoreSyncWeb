@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './style.css'
+import NotificationBell from '../../components/NotificationBell'
 import { useAuth } from '../../contexts/AuthContext'
 import { logout } from '../../services/auth.service'
 import { getUsers, deleteUser, updateUser } from '../../services/user.service'
@@ -176,6 +177,7 @@ function AdminDashboard() {
             <button className="admin-header__create" onClick={() => navigate('/criar-evento')}>+ Evento</button>
           )}
         </div>
+        <NotificationBell />
         <button className="admin-header__logout" onClick={handleLogout}>Sair</button>
       </header>
 
