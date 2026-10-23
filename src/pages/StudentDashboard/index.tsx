@@ -7,7 +7,7 @@ import { getTrainings, enrollInTraining, getMyEnrollments, updateEnrollment } fr
 import { getEvents } from '../../services/event.service'
 import { getAllEventRegistrations, registerInEvent, updateEventRegistration } from '../../services/eventRegistration.service'
 import { getStravaActivities, syncStravaActivities } from '../../services/strava.service'
-import type { Training, Enrollment, Event, EventRegistration, StravaActivity } from '../../types'
+import { LEVEL_LABELS, type Training, type Enrollment, type Event, type EventRegistration, type StravaActivity } from '../../types'
 import { useNavigate } from 'react-router-dom'
 
 type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
@@ -27,11 +27,17 @@ function formatSeconds(s: number) {
 function TrainingCard({ training, action }: { training: Training; action: React.ReactNode }) {
   return (
     <div className="training-card">
-      <p className="training-card__title">{training.modality}</p>
+      <div className="training-card__heading">
+        <p className="training-card__title">{training.modality}</p>
+        {training.level && <span className="level-badge">{LEVEL_LABELS[training.level] ?? training.level}</span>}
+      </div>
       <p className="training-card__detail">
         {(training.weekdays ?? []).map(d => WEEKDAY_LABEL[d] ?? d).join(', ')} · {training.hour}
       </p>
-      <p className="training-card__detail">{training.address}</p>
+      <p className="training-card__detail">
+        {training.address}{training.campus && ` · ${training.campus}`}
+      </p>
+      {training.professor && <p className="training-card__detail">Professor: {training.professor.name}</p>}
       {training.description && <p className="training-card__detail">{training.description}</p>}
       <p className="training-card__detail">Vagas: {training.maxStudents}</p>
       <div className="training-card__actions">{action}</div>
@@ -75,6 +81,8 @@ function StudentDashboard() {
   const [registeringEventId, setRegisteringEventId] = useState<number | null>(null)
   const [errorAvailable, setErrorAvailable] = useState('')
   const [errorEnrolled, setErrorEnrolled] = useState('')
+  const [modalityFilter, setModalityFilter] = useState('')
+  const [levelFilter, setLevelFilter] = useState('')
   const { signOut, userId } = useAuth()
   const navigate = useNavigate()
 
@@ -196,6 +204,13 @@ function StudentDashboard() {
   const cancelledEnrollments = myEnrollments.filter(e => !e.active)
   const enrolledTrainingIds = new Set(activeEnrollments.map(e => e.training.id))
 
+  const modalities = [...new Set(available.map(t => t.modality))].sort()
+  const filteredAvailable = available.filter(t =>
+    t.active !== false &&
+    (!modalityFilter || t.modality === modalityFilter) &&
+    (!levelFilter || t.level === levelFilter),
+  )
+
   const myEventRegs = userId ? eventRegs.filter(r => r.user?.id === userId) : []
   const activeEventRegIds = new Set(myEventRegs.filter(r => r.active).map(r => r.event.id))
 
@@ -247,13 +262,25 @@ function StudentDashboard() {
         {tab === 'matricula' && (
           <>
             <h2 className="section-title">Treinos Disponíveis</h2>
+            <div className="filter-bar">
+              <select className="filter-bar__select" value={modalityFilter} onChange={e => setModalityFilter(e.target.value)}>
+                <option value="">Todas as modalidades</option>
+                {modalities.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <select className="filter-bar__select" value={levelFilter} onChange={e => setLevelFilter(e.target.value)}>
+                <option value="">Todos os níveis</option>
+                {Object.entries(LEVEL_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
             {loadingAvailable && <p className="empty-state">Carregando...</p>}
             {errorAvailable && <p className="empty-state error">{errorAvailable}</p>}
-            {!loadingAvailable && !errorAvailable && available.length === 0 && (
+            {!loadingAvailable && !errorAvailable && filteredAvailable.length === 0 && (
               <p className="empty-state">Nenhum treino disponível no momento.</p>
             )}
             <div className="training-grid">
-              {available.map(t => (
+              {filteredAvailable.map(t => (
                 <TrainingCard
                   key={t.id}
                   training={t}

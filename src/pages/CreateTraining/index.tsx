@@ -8,7 +8,7 @@ import useForm from '../../hooks/useForm'
 import { createTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
 import { useAuth } from '../../contexts/AuthContext'
-import type { TrainingPayload, User } from '../../types'
+import { LEVEL_LABELS, type TrainingLevel, type TrainingPayload, type User } from '../../types'
 
 const MODALIDADE_OPTIONS = [
   { value: 'atletismo', label: 'Atletismo' },
@@ -17,6 +17,8 @@ const MODALIDADE_OPTIONS = [
   { value: 'basquete', label: 'Basquete' },
   { value: 'judo', label: 'Judô' },
 ]
+
+const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label }))
 
 const DIAS = [
   { value: 'segunda', label: 'Seg' },
@@ -36,6 +38,8 @@ const INITIAL = {
   maxStudents: '',
   minStudents: '',
   professorId: '',
+  level: 'iniciante',
+  campus: '',
 }
 
 function CreateTraining() {
@@ -80,6 +84,8 @@ function CreateTraining() {
         description: values.description || undefined,
         maxStudents: Number(values.maxStudents),
         minStudents: Number(values.minStudents),
+        level: values.level as TrainingLevel,
+        campus: values.campus || undefined,
         ...(userRole === 'admin' ? { professorId: Number(values.professorId) } : {}),
       }
       await createTraining(payload)
@@ -99,6 +105,7 @@ function CreateTraining() {
         <div className="form-section">
           <h2>Informações do Treino</h2>
           <Select name="modality" placeholder="Modalidade" options={MODALIDADE_OPTIONS} value={values.modality} onChange={handleChange} />
+          <Select name="level" label="Nível dos atletas" options={LEVEL_OPTIONS} value={values.level} onChange={handleChange} />
           {userRole === 'admin' && (
             <Select
               name="professorId"
@@ -136,6 +143,7 @@ function CreateTraining() {
         <div className="form-section">
           <h2>Local</h2>
           <Input name="address" type="text" placeholder="Endereço / Local do treino" value={values.address} onChange={handleChange} />
+          <Input name="campus" type="text" placeholder="Campus / unidade (opcional)" value={values.campus} onChange={handleChange} />
         </div>
 
         <div className="form-section">

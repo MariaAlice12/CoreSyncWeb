@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './style.css'
 import { useAuth } from '../../contexts/AuthContext'
 import { getUserById, updateUser } from '../../services/user.service'
-import type { User } from '../../types'
+import { SHIFT_LABELS, type Shift, type User } from '../../types'
 
 function ProfilePage() {
   const { userId } = useAuth()
@@ -16,6 +16,9 @@ function ProfilePage() {
   const [name, setName] = useState('')
   const [telephone, setTelephone] = useState('')
   const [password, setPassword] = useState('')
+  const [course, setCourse] = useState('')
+  const [shift, setShift] = useState('')
+  const [campus, setCampus] = useState('')
 
   useEffect(() => {
     if (!userId) return
@@ -24,6 +27,9 @@ function ProfilePage() {
         setUser(u)
         setName(u.name)
         setTelephone(u.telephone)
+        setCourse(u.course ?? '')
+        setShift(u.shift ?? '')
+        setCampus(u.campus ?? '')
       })
       .catch(() => setError('Não foi possível carregar o perfil'))
       .finally(() => setLoading(false))
@@ -36,12 +42,19 @@ function ProfilePage() {
     setError('')
     setSuccess('')
     try {
-      const payload: Record<string, string> = { name, telephone }
+      const isAthlete = user?.userType === 'aluno'
+      const payload: Record<string, string> = { name, telephone, campus }
+      if (isAthlete) Object.assign(payload, { course, ...(shift ? { shift } : {}) })
       if (password) payload.password = password
       await updateUser(userId, payload)
       setSuccess('Perfil atualizado com sucesso!')
       setPassword('')
-      if (user) setUser({ ...user, name, telephone })
+      if (user) {
+        setUser({
+          ...user, name, telephone, campus,
+          ...(isAthlete ? { course, shift: (shift || null) as Shift | null } : {}),
+        })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar perfil')
     } finally {
@@ -104,6 +117,44 @@ function ProfilePage() {
               type="tel"
               value={telephone}
               onChange={e => setTelephone(e.target.value)}
+            />
+          </div>
+
+          {user?.userType === 'aluno' && (
+            <>
+              <div className="profile-field">
+                <label className="profile-field__label">Curso</label>
+                <input
+                  className="profile-field__input"
+                  type="text"
+                  value={course}
+                  onChange={e => setCourse(e.target.value)}
+                />
+              </div>
+
+              <div className="profile-field">
+                <label className="profile-field__label">Turno</label>
+                <select
+                  className="profile-field__input"
+                  value={shift}
+                  onChange={e => setShift(e.target.value)}
+                >
+                  <option value="" disabled>Selecione</option>
+                  {Object.entries(SHIFT_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
+          <div className="profile-field">
+            <label className="profile-field__label">Campus / unidade</label>
+            <input
+              className="profile-field__input"
+              type="text"
+              value={campus}
+              onChange={e => setCampus(e.target.value)}
             />
           </div>
 

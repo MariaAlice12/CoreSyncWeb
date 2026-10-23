@@ -8,7 +8,7 @@ import { getUsers, deleteUser, updateUser } from '../../services/user.service'
 import { getTrainings, deleteTraining } from '../../services/training.service'
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAdminOverview } from '../../services/analytics.service'
-import type { User, Training, Event, AdminOverview } from '../../types'
+import { LEVEL_LABELS, SHIFT_LABELS, type User, type Training, type Event, type AdminOverview, type Shift } from '../../types'
 
 type Tab = 'professores' | 'atletas' | 'treinos' | 'eventos' | 'insights'
 
@@ -36,6 +36,9 @@ function AdminDashboard() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [editName, setEditName] = useState('')
   const [editTelephone, setEditTelephone] = useState('')
+  const [editCourse, setEditCourse] = useState('')
+  const [editShift, setEditShift] = useState('')
+  const [editCampus, setEditCampus] = useState('')
   const { signOut } = useAuth()
   const navigate = useNavigate()
 
@@ -111,13 +114,23 @@ function AdminDashboard() {
     setEditingUser(user)
     setEditName(user.name)
     setEditTelephone(user.telephone)
+    setEditCourse(user.course ?? '')
+    setEditShift(user.shift ?? '')
+    setEditCampus(user.campus ?? '')
   }
 
   async function handleSaveUser() {
     if (!editingUser) return
     try {
-      await updateUser(editingUser.id, { name: editName, telephone: editTelephone })
-      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, name: editName, telephone: editTelephone } : u))
+      const isAthlete = editingUser.userType === 'aluno'
+      const changes = {
+        name: editName,
+        telephone: editTelephone,
+        campus: editCampus,
+        ...(isAthlete ? { course: editCourse, ...(editShift ? { shift: editShift as Shift } : {}) } : {}),
+      }
+      await updateUser(editingUser.id, changes)
+      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...changes } : u))
       setEditingUser(null)
     } catch {
       setError('Não foi possível atualizar o usuário')
@@ -142,7 +155,12 @@ function AdminDashboard() {
             <span className="admin-user-avatar">{u.name[0].toUpperCase()}</span>
             <div className="admin-user-info">
               <span className="admin-user-name">{u.name}</span>
-              <span className="admin-user-meta">{u.email} · {u.telephone}</span>
+              <span className="admin-user-meta">
+                {u.email} · {u.telephone}
+                {u.course && ` · ${u.course}`}
+                {u.shift && ` · ${SHIFT_LABELS[u.shift]}`}
+                {u.campus && ` · ${u.campus}`}
+              </span>
             </div>
             <div className="admin-user-actions">
               <button className="row-btn row-btn--edit" onClick={() => openEditUser(u)}>Editar</button>
@@ -212,6 +230,7 @@ function AdminDashboard() {
                       {(t.weekdays ?? []).map(d => WEEKDAY_LABEL[d] ?? d).join(', ')} · {t.hour} · {t.address}
                     </span>
                   </div>
+                  <span className="admin-row__badge">{LEVEL_LABELS[t.level] ?? t.level}</span>
                   <span className="admin-row__badge">{t.maxStudents} vagas</span>
                   <div className="admin-row__actions">
                     <button className="row-btn row-btn--edit" onClick={() => navigate(`/editar-treino/${t.id}`)}>Editar</button>
@@ -342,6 +361,33 @@ function AdminDashboard() {
                 className="edit-form__input"
                 value={editTelephone}
                 onChange={e => setEditTelephone(e.target.value)}
+              />
+              {editingUser.userType === 'aluno' && (
+                <>
+                  <label className="edit-form__label">Curso</label>
+                  <input
+                    className="edit-form__input"
+                    value={editCourse}
+                    onChange={e => setEditCourse(e.target.value)}
+                  />
+                  <label className="edit-form__label">Turno</label>
+                  <select
+                    className="edit-form__input"
+                    value={editShift}
+                    onChange={e => setEditShift(e.target.value)}
+                  >
+                    <option value="" disabled>Selecione</option>
+                    {Object.entries(SHIFT_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                </>
+              )}
+              <label className="edit-form__label">Campus / unidade</label>
+              <input
+                className="edit-form__input"
+                value={editCampus}
+                onChange={e => setEditCampus(e.target.value)}
               />
             </div>
             <div className="confirm-dialog__actions">

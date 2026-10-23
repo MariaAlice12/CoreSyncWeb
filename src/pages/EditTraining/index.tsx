@@ -7,7 +7,7 @@ import Button from '../../components/Button'
 import { getTrainingById, updateTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
 import { useAuth } from '../../contexts/AuthContext'
-import type { TrainingPayload, User } from '../../types'
+import { LEVEL_LABELS, type TrainingLevel, type TrainingPayload, type User } from '../../types'
 
 const MODALIDADE_OPTIONS = [
   { value: 'atletismo', label: 'Atletismo' },
@@ -16,6 +16,8 @@ const MODALIDADE_OPTIONS = [
   { value: 'basquete', label: 'Basquete' },
   { value: 'judo', label: 'Judô' },
 ]
+
+const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label }))
 
 const DIAS = [
   { value: 'segunda', label: 'Seg' },
@@ -42,6 +44,8 @@ function EditTraining() {
   const [maxStudents, setMaxStudents] = useState('')
   const [minStudents, setMinStudents] = useState('')
   const [professorId, setProfessorId] = useState('')
+  const [level, setLevel] = useState<TrainingLevel>('iniciante')
+  const [campus, setCampus] = useState('')
   const [professors, setProfessors] = useState<User[]>([])
   const { userRole } = useAuth()
 
@@ -57,6 +61,8 @@ function EditTraining() {
         setMaxStudents(String(t.maxStudents))
         setMinStudents(String(t.minStudents))
         setProfessorId(t.professor ? String(t.professor.id) : '')
+        setLevel(t.level ?? 'iniciante')
+        setCampus(t.campus ?? '')
       })
       .catch(() => setError('Não foi possível carregar o treino'))
       .finally(() => setLoadingData(false))
@@ -91,10 +97,12 @@ function EditTraining() {
         description: description || undefined,
         maxStudents: Number(maxStudents),
         minStudents: Number(minStudents),
+        level,
+        campus,
         ...(userRole === 'admin' && professorId ? { professorId: Number(professorId) } : {}),
       }
       await updateTraining(Number(id), payload)
-      navigate('/dashboard/professor')
+      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar treino')
     } finally {
@@ -123,6 +131,13 @@ function EditTraining() {
             options={MODALIDADE_OPTIONS}
             value={modality}
             onChange={e => setModality(e.target.value)}
+          />
+          <Select
+            name="level"
+            label="Nível dos atletas"
+            options={LEVEL_OPTIONS}
+            value={level}
+            onChange={e => setLevel(e.target.value as TrainingLevel)}
           />
           {userRole === 'admin' && (
             <Select
@@ -167,6 +182,13 @@ function EditTraining() {
             value={address}
             onChange={e => setAddress(e.target.value)}
           />
+          <Input
+            name="campus"
+            type="text"
+            placeholder="Campus / unidade (opcional)"
+            value={campus}
+            onChange={e => setCampus(e.target.value)}
+          />
         </div>
 
         <div className="form-section">
@@ -180,7 +202,7 @@ function EditTraining() {
         {error && <p className="form-error">{error}</p>}
 
         <div className="form-actions">
-          <Button type="button" variant="secondary" onClick={() => navigate('/dashboard/professor')}>
+          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancelar
           </Button>
           <Button type="submit" disabled={loading}>
