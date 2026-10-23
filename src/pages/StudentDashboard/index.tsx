@@ -261,6 +261,7 @@ function StudentDashboard() {
             Strava
           </button>
         </nav>
+        <button className="student-header__profile" onClick={() => navigate('/agenda')}>Agenda</button>
         <NotificationBell />
         <button className="student-header__profile" onClick={() => navigate('/perfil')}>Perfil</button>
         <button className="student-header__logout" onClick={handleLogout}>Sair</button>

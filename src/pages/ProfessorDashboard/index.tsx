@@ -179,6 +179,7 @@ function ProfessorDashboard() {
             </button>
           )}
         </div>
+        <button className="professor-header__profile" onClick={() => navigate('/agenda')}>Agenda</button>
         <NotificationBell />
         <button className="professor-header__profile" onClick={() => navigate('/perfil')}>Perfil</button>
         <button className="professor-header__logout" onClick={handleLogout}>Sair</button>

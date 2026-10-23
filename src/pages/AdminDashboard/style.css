@@ -376,3 +376,20 @@
 .edit-form__input:focus {
   border-color: var(--color-primary);
 }
+
+.admin-header__agenda {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-input);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: var(--font-main);
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.admin-header__agenda:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}

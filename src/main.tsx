@@ -15,6 +15,7 @@ import CreateEvent from './pages/CreateEvent'
 import EditEvent from './pages/EditEvent'
 import EventDetail from './pages/EventDetail'
 import ProfilePage from './pages/ProfilePage'
+import Agenda from './pages/Agenda'
 
 function DashboardRedirect() {
   const { userRole } = useAuth()
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/editar-evento/:id" element={<EditEvent />} />
               <Route path="/evento/:id" element={<EventDetail />} />
               <Route path="/perfil" element={<ProfilePage />} />
+              <Route path="/agenda" element={<Agenda />} />
             </Route>
           </Routes>
         </NotificationProvider>

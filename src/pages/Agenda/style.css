@@ -1,0 +1,98 @@
+.agenda-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.agenda-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px;
+  height: 64px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.agenda-header .back-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.agenda-header__title {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.agenda-content {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 32px;
+}
+
+.agenda-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #555;
+}
+
+.agenda-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agenda-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.agenda-calendar {
+  background: white;
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  font-size: 13px;
+  --fc-button-bg-color: var(--color-primary);
+  --fc-button-border-color: var(--color-primary);
+  --fc-button-hover-bg-color: var(--color-primary-dark);
+  --fc-button-hover-border-color: var(--color-primary-dark);
+  --fc-button-active-bg-color: var(--color-primary-dark);
+  --fc-button-active-border-color: var(--color-primary-dark);
+  --fc-today-bg-color: #eef2ff;
+}
+
+.agenda-calendar .fc-toolbar-title {
+  font-size: 18px;
+  text-transform: capitalize;
+}
+
+.agenda-calendar .fc-event {
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .agenda-header,
+  .agenda-content {
+    padding: 0 16px;
+  }
+
+  .agenda-calendar {
+    padding: 8px;
+  }
+
+  .agenda-calendar .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

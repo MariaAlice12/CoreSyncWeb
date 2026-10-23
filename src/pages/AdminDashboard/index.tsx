@@ -195,6 +195,7 @@ function AdminDashboard() {
             <button className="admin-header__create" onClick={() => navigate('/criar-evento')}>+ Evento</button>
           )}
         </div>
+        <button className="admin-header__agenda" onClick={() => navigate('/agenda')}>Agenda</button>
         <NotificationBell />
         <button className="admin-header__logout" onClick={handleLogout}>Sair</button>
       </header>
