@@ -3,12 +3,31 @@ export interface LoginPayload {
   password: string
 }
 
+export type Shift = 'manha' | 'tarde' | 'noite' | 'integral'
+export type TrainingLevel = 'iniciante' | 'intermediario' | 'avancado'
+
+export const SHIFT_LABELS: Record<Shift, string> = {
+  manha: 'Manhã',
+  tarde: 'Tarde',
+  noite: 'Noite',
+  integral: 'Integral',
+}
+
+export const LEVEL_LABELS: Record<TrainingLevel, string> = {
+  iniciante: 'Iniciante',
+  intermediario: 'Intermediário',
+  avancado: 'Avançado',
+}
+
 export interface RegisterPayload {
   name: string
   email: string
   telephone: string
   password: string
   userType: 'aluno' | 'professor'
+  course?: string
+  shift?: Shift
+  campus?: string
 }
 
 export interface TrainingPayload {
@@ -19,6 +38,8 @@ export interface TrainingPayload {
   description?: string
   maxStudents: number
   minStudents: number
+  level?: TrainingLevel
+  campus?: string
   professorId?: number
 }
 
@@ -27,7 +48,10 @@ export interface EventPayload {
   description: string
   image?: string
   date: string
-  bracketGenerated?: boolean
+  location?: string
+  organizerIds?: number[]
+  bracketType?: 'single' | 'double' | 'round-robin'
+  teamCount?: number
 }
 
 export interface ApiResponse<T> {
@@ -50,6 +74,8 @@ export interface Training {
   active: boolean
   maxStudents: number
   minStudents: number
+  level: TrainingLevel
+  campus?: string | null
   professor?: { id: number; name: string; email: string } | null
 }
 
@@ -73,8 +99,17 @@ export interface Event {
   description: string
   image?: string
   date?: string
+  location?: string | null
   tournamentBracket?: TournamentBracket
   user?: { id: number; name: string }
+  organizers?: { id: number; name: string; userType: string }[]
+}
+
+export interface EventPhoto {
+  id: number
+  url: string
+  createdAt: string
+  uploadedBy?: { id: number; name: string } | null
 }
 
 export interface EventRegistration {
@@ -90,6 +125,9 @@ export interface User {
   email: string
   telephone: string
   userType: 'aluno' | 'professor' | 'admin'
+  course?: string | null
+  shift?: Shift | null
+  campus?: string | null
 }
 
 export interface SurveyResponse {
@@ -147,5 +185,83 @@ export interface StravaActivity {
   sportType?: string
   averageSpeed?: number
   maxSpeed?: number
+  averageHeartrate?: number | null
+  maxHeartrate?: number | null
+  averageCadence?: number | null
+  /** segundos por km */
+  pace: number | null
   startDate: string
+}
+
+export interface StravaStatus {
+  configured: boolean
+  connected: boolean
+  athleteName: string | null
+  connectedAt: string | null
+}
+
+export interface Attendance {
+  id: number
+  date: string
+  training: Training
+  user: { id: number; name: string }
+}
+
+export interface AttendanceSession {
+  date: string
+  count: number
+  attendees: { id: number; name: string; attendanceId: number }[]
+}
+
+export interface AppNotification {
+  id: number
+  title: string
+  message: string
+  type: string
+  link: string | null
+  read: boolean
+  createdAt: string
+}
+
+export interface SegmentRow {
+  key: string
+  enrollments: number
+  attendances: number
+}
+
+export interface Segmentation {
+  totals: {
+    athletes: number
+    enrolledAthletes: number
+    activeEnrollments: number
+    attendancesLast30Days: number
+  }
+  byModality: SegmentRow[]
+  byLevel: SegmentRow[]
+  byCourse: SegmentRow[]
+  byShift: SegmentRow[]
+  byCampus: SegmentRow[]
+}
+
+export interface AttendanceRate {
+  trainingId: number
+  modality: string
+  activeEnrollments: number
+  averageRatePct: number
+  sessions: { date: string; present: number; ratePct: number }[]
+}
+
+export interface AthletePerformance {
+  athlete: { id: number; name: string; course?: string | null; shift?: Shift | null }
+  totals: {
+    attendances: number
+    activities: number
+    distanceKm: number
+    movingTimeMin: number
+    avgPace: number | null
+    avgHeartrate: number | null
+  }
+  attendanceByWeek: { week: string; count: number }[]
+  attendanceByModality: { modality: string; count: number }[]
+  activities: StravaActivity[]
 }

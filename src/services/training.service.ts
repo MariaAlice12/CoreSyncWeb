@@ -20,10 +20,10 @@ export const enrollInTraining = (trainingId: number, userId: number) =>
   request<Enrollment>('/enrollment', { method: 'POST', body: JSON.stringify({ trainingId, userId }) })
 
 export const getMyEnrollments = () =>
-  request<Enrollment[]>('/enrollment')
+  request<Enrollment[]>('/enrollment/me')
 
-export const getAllEnrollments = () =>
-  request<Enrollment[]>('/enrollment')
+export const getAllEnrollments = (filters: { trainingId?: number } = {}) =>
+  request<Enrollment[]>(`/enrollment${filters.trainingId ? `?trainingId=${filters.trainingId}` : ''}`)
 
 export const updateEnrollment = (enrollmentId: number, data: { active: boolean }) =>
   request<Enrollment>(`/enrollment/${enrollmentId}`, { method: 'PATCH', body: JSON.stringify(data) })

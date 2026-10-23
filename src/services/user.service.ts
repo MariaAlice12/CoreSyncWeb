@@ -1,5 +1,5 @@
 import request from './api'
-import type { User } from '../types'
+import type { Shift, User } from '../types'
 
 export interface CreateUserPayload {
   name: string
@@ -7,7 +7,13 @@ export interface CreateUserPayload {
   telephone: string
   password: string
   userType: 'aluno' | 'professor' | 'admin'
+  course?: string
+  shift?: Shift
+  campus?: string
 }
+
+export const createUser = (payload: CreateUserPayload) =>
+  request<User>('/user', { method: 'POST', body: JSON.stringify(payload) })
 
 export const getUsers = () =>
   request<User[]>('/user')

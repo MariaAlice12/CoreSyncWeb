@@ -3,16 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import '../CreateTraining/style.css'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
+import Select from '../../components/Select'
 import useForm from '../../hooks/useForm'
 import { createEvent } from '../../services/event.service'
 import type { EventPayload } from '../../types'
 
-const INITIAL = { title: '', description: '', image: '', date: '' }
+const INITIAL = { title: '', description: '', image: '', date: '', bracketType: '', teamCount: '' }
+
+const BRACKET_OPTIONS = [
+  { value: 'single', label: 'Eliminação simples' },
+  { value: 'double', label: 'Eliminação dupla' },
+  { value: 'round-robin', label: 'Todos contra todos' },
+]
 
 function CreateEvent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [bracketGenerated, setBracketGenerated] = useState(false)
   const navigate = useNavigate()
   const { values, handleChange } = useForm(INITIAL)
 
@@ -30,7 +36,12 @@ function CreateEvent() {
         description: values.description,
         image: values.image || undefined,
         date: values.date,
-        bracketGenerated,
+        ...(values.bracketType
+          ? {
+              bracketType: values.bracketType as EventPayload['bracketType'],
+              teamCount: values.teamCount ? Number(values.teamCount) : undefined,
+            }
+          : {}),
       }
       await createEvent(payload)
       navigate(-1)
@@ -65,13 +76,15 @@ function CreateEvent() {
 
         <div className="form-section">
           <h2>Chaveamento</h2>
-          <button
-            type="button"
-            className={`toggle-btn${bracketGenerated ? ' toggle-btn--active' : ''}`}
-            onClick={() => setBracketGenerated(v => !v)}
-          >
-            {bracketGenerated ? 'Chaveamento ativado' : 'Gerar chaveamento'}
-          </button>
+          <Select
+            name="bracketType"
+            options={[{ value: '', label: 'Sem chaveamento' }, ...BRACKET_OPTIONS]}
+            value={values.bracketType}
+            onChange={handleChange}
+          />
+          {values.bracketType && (
+            <Input name="teamCount" type="number" min={2} placeholder="Número de equipes" value={values.teamCount} onChange={handleChange} />
+          )}
         </div>
 
         {error && <p className="form-error">{error}</p>}

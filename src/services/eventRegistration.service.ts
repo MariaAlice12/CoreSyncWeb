@@ -18,3 +18,9 @@ export const updateEventRegistration = (id: number, data: { active: boolean }) =
 
 export const removeEventRegistration = (id: number) =>
   request(`/event-registration/${id}`, { method: 'DELETE' })
+
+export const getEventParticipants = (eventId: number) =>
+  request<EventRegistration[]>(`/event-registration?eventId=${eventId}`)
+
+export const getMyEventRegistrations = () =>
+  request<EventRegistration[]>('/event-registration/me')
