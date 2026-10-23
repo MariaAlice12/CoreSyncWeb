@@ -4,11 +4,12 @@ import '../CreateTraining/style.css'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
 import Select from '../../components/Select'
+import OrganizerPicker from '../../components/OrganizerPicker'
 import useForm from '../../hooks/useForm'
 import { createEvent } from '../../services/event.service'
 import type { EventPayload } from '../../types'
 
-const INITIAL = { title: '', description: '', image: '', date: '', bracketType: '', teamCount: '' }
+const INITIAL = { title: '', description: '', image: '', date: '', location: '', bracketType: '', teamCount: '' }
 
 const BRACKET_OPTIONS = [
   { value: 'single', label: 'Eliminação simples' },
@@ -19,6 +20,7 @@ const BRACKET_OPTIONS = [
 function CreateEvent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [organizerIds, setOrganizerIds] = useState<number[]>([])
   const navigate = useNavigate()
   const { values, handleChange } = useForm(INITIAL)
 
@@ -36,6 +38,8 @@ function CreateEvent() {
         description: values.description,
         image: values.image || undefined,
         date: values.date,
+        location: values.location || undefined,
+        organizerIds,
         ...(values.bracketType
           ? {
               bracketType: values.bracketType as EventPayload['bracketType'],
@@ -70,8 +74,14 @@ function CreateEvent() {
         </div>
 
         <div className="form-section">
-          <h2>Data</h2>
+          <h2>Data e local</h2>
           <Input name="date" type="datetime-local" value={values.date} onChange={handleChange} />
+          <Input name="location" type="text" placeholder="Local do evento" value={values.location} onChange={handleChange} />
+        </div>
+
+        <div className="form-section">
+          <h2>Organizadores</h2>
+          <OrganizerPicker value={organizerIds} onChange={setOrganizerIds} />
         </div>
 
         <div className="form-section">

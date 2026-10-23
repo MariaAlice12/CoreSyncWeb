@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import '../CreateTraining/style.css'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
+import OrganizerPicker from '../../components/OrganizerPicker'
 import { getEventById, updateEvent } from '../../services/event.service'
 
 function EditEvent() {
@@ -15,6 +16,8 @@ function EditEvent() {
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
   const [date, setDate] = useState('')
+  const [location, setLocation] = useState('')
+  const [organizerIds, setOrganizerIds] = useState<number[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -24,6 +27,8 @@ function EditEvent() {
         setDescription(event.description)
         setImage(event.image ?? '')
         setDate(event.date ? event.date.slice(0, 16) : '')
+        setLocation(event.location ?? '')
+        setOrganizerIds((event.organizers ?? []).map(o => o.id))
       })
       .catch(() => setError('Não foi possível carregar o evento'))
       .finally(() => setFetching(false))
@@ -40,6 +45,8 @@ function EditEvent() {
         description,
         image: image || undefined,
         date: date || undefined,
+        location,
+        organizerIds,
       })
       navigate(-1)
     } catch (err) {
@@ -89,13 +96,25 @@ function EditEvent() {
         </div>
 
         <div className="form-section">
-          <h2>Data</h2>
+          <h2>Data e local</h2>
           <Input
             name="date"
             type="datetime-local"
             value={date}
             onChange={e => setDate(e.target.value)}
           />
+          <Input
+            name="location"
+            type="text"
+            placeholder="Local do evento"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+          />
+        </div>
+
+        <div className="form-section">
+          <h2>Organizadores</h2>
+          <OrganizerPicker value={organizerIds} onChange={setOrganizerIds} />
         </div>
 
         {error && <p className="form-error">{error}</p>}
