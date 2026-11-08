@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useNotifications } from '../../contexts/NotificationContext'
+import { useNotifications } from '../../contexts/notifications'
 import type { AppNotification } from '../../types'
 import './style.css'
 

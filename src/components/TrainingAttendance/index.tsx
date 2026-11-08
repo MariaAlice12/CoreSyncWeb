@@ -25,31 +25,50 @@ function daysAgo(n: number) {
 
 /** Presenças de um treino: histórico (taxa por sessão) e próximas sessões. */
 function TrainingAttendance({ training }: { training: Training }) {
-  const [rate, setRate] = useState<AttendanceRate | null>(null)
-  const [sessions, setSessions] = useState<AttendanceSession[]>([])
+  // Resultado guardado junto com o treino que o gerou: "carregando" é derivado
+  // e uma resposta atrasada (de outro treino) não sobrescreve a atual.
+  const [result, setResult] = useState<{
+    trainingId: number
+    rate: AttendanceRate | null
+    sessions: AttendanceSession[]
+    error: string
+  } | null>(null)
   /** attendanceId com o formulário de desempenho aberto */
   const [editing, setEditing] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
-    setLoading(true)
-    setError('')
-    Promise.all([getAttendanceRate(training.id, 8), getTrainingSessions(training.id, daysAgo(RECENT_DAYS))])
-      .then(([r, s]) => {
-        setRate(r)
-        setSessions(s)
-      })
-      .catch(err => setError(err instanceof Error ? err.message : 'Não foi possível carregar as presenças'))
-      .finally(() => setLoading(false))
+    let active = true
+    const trainingId = training.id
+    Promise.all([getAttendanceRate(trainingId, 8), getTrainingSessions(trainingId, daysAgo(RECENT_DAYS))])
+      .then(([rate, sessions]) => active && setResult({ trainingId, rate, sessions, error: '' }))
+      .catch(err =>
+        active &&
+        setResult({
+          trainingId,
+          rate: null,
+          sessions: [],
+          error: err instanceof Error ? err.message : 'Não foi possível carregar as presenças',
+        }),
+      )
+    return () => {
+      active = false
+    }
   }, [training.id])
 
+  const loading = result?.trainingId !== training.id
+  const rate = loading ? null : result.rate
+  const sessions = loading ? [] : result.sessions
+  const error = loading ? '' : result.error
+
   function updatePerformance(attendanceId: number, performance: PerformanceRecord | null) {
-    setSessions(prev =>
-      prev.map(s => ({
-        ...s,
-        attendees: s.attendees.map(a => (a.attendanceId === attendanceId ? { ...a, performance } : a)),
-      })),
+    setResult(prev =>
+      prev && {
+        ...prev,
+        sessions: prev.sessions.map(s => ({
+          ...s,
+          attendees: s.attendees.map(a => (a.attendanceId === attendanceId ? { ...a, performance } : a)),
+        })),
+      },
     )
     setEditing(null)
   }

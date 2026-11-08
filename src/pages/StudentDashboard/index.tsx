@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './style.css'
 import NotificationBell from '../../components/NotificationBell'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import { logout } from '../../services/auth.service'
 import { getTrainings, enrollInTraining, getMyEnrollments, updateEnrollment } from '../../services/training.service'
 import { getEvents } from '../../services/event.service'
@@ -14,7 +14,7 @@ import AttendanceSessions from '../../components/AttendanceSessions'
 import SelfLevelDialog from '../../components/SelfLevelDialog'
 import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration, type TrainingLevel } from '../../types'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useNotifications } from '../../contexts/NotificationContext'
+import { useNotifications } from '../../contexts/notifications'
 
 type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
 

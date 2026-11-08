@@ -57,18 +57,30 @@ function sessionShare(name: string, s: AthleteSession): ShareCardData {
 
 /** Indicadores, gráficos e atividades do atleta (presenças + Strava + desempenho registrado). */
 function AthletePerformanceView({ athleteId, shareable = false }: { athleteId: number; shareable?: boolean }) {
-  const [data, setData] = useState<AthletePerformance | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  // Resultado guardado junto com o atleta que o gerou: "carregando" é derivado
+  // e uma resposta atrasada (de outro atleta) não sobrescreve a atual.
+  const [result, setResult] = useState<{ athleteId: number; data: AthletePerformance | null; error: string } | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    setError('')
+    let active = true
     getAthletePerformance(athleteId)
-      .then(setData)
-      .catch(err => setError(err instanceof Error ? err.message : 'Não foi possível carregar o desempenho'))
-      .finally(() => setLoading(false))
+      .then(data => active && setResult({ athleteId, data, error: '' }))
+      .catch(err =>
+        active &&
+        setResult({
+          athleteId,
+          data: null,
+          error: err instanceof Error ? err.message : 'Não foi possível carregar o desempenho',
+        }),
+      )
+    return () => {
+      active = false
+    }
   }, [athleteId])
+
+  const loading = result?.athleteId !== athleteId
+  const data = loading ? null : result.data
+  const error = loading ? '' : result.error
 
   if (loading) return <p className="empty-state">Carregando...</p>
   if (error) return <p className="empty-state error">{error}</p>

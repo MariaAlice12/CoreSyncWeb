@@ -1,10 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import DashboardRedirect from './components/DashboardRedirect'
 import Home from './pages/Home'
 import CreateTraining from './pages/CreateTraining'
 import EditTraining from './pages/EditTraining'
@@ -16,13 +17,6 @@ import EditEvent from './pages/EditEvent'
 import EventDetail from './pages/EventDetail'
 import ProfilePage from './pages/ProfilePage'
 import Agenda from './pages/Agenda'
-
-function DashboardRedirect() {
-  const { userRole } = useAuth()
-  if (userRole === 'aluno') return <Navigate to="/dashboard/atleta" replace />
-  if (userRole === 'admin') return <Navigate to="/dashboard/admin" replace />
-  return <Navigate to="/dashboard/professor" replace />
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

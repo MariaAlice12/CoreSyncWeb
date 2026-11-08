@@ -1,3 +1,5 @@
+import { createElement } from 'react'
+
 // Tokens compartilhados pelos gráficos (Recharts). Paleta validada para
 // daltonismo e contraste sobre fundo branco: a série 1 é a cor primária do app.
 export const SERIES = ['#6366f1', '#0d9488'] as const
@@ -27,7 +29,7 @@ export const LEGEND = {
   iconType: 'square',
   iconSize: 10,
   wrapperStyle: { fontSize: 12 },
-  formatter: (value: string) => <span style={{ color: '#555' }}>{value}</span>,
+  formatter: (value: string) => createElement('span', { style: { color: '#555' } }, value),
 } as const
 
 /** Cantos arredondados só na ponta da barra (a base fica no eixo). */

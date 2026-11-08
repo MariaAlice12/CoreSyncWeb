@@ -7,7 +7,7 @@ import Button from '../../components/Button'
 import ModalityInput from '../../components/ModalityInput'
 import { getTrainingById, updateTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import { type TrainingPayload, type User } from '../../types'
 
 

@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { useAuth } from './AuthContext'
+import { useAuth } from './auth'
+import { NotificationContext } from './notifications'
 import { getToken } from '../utils/token'
 import { BASE_URL } from '../services/api'
 import {
@@ -10,18 +11,6 @@ import {
 } from '../services/notification.service'
 import type { AppNotification } from '../types'
 
-interface NotificationContextValue {
-  items: AppNotification[]
-  unread: number
-  /** Última notificação recebida em tempo real (para exibir um aviso) */
-  latest: AppNotification | null
-  dismissLatest: () => void
-  markRead: (id: number) => Promise<void>
-  markAllRead: () => Promise<void>
-}
-
-const NotificationContext = createContext<NotificationContextValue | null>(null)
-
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
   const [items, setItems] = useState<AppNotification[]>([])
@@ -29,11 +18,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [latest, setLatest] = useState<AppNotification | null>(null)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setItems([])
-      setUnread(0)
-      return
-    }
+    if (!isAuthenticated) return
 
     getMyNotifications()
       .then(res => {
@@ -54,6 +39,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     })
     return () => {
       socket.disconnect()
+      // Ao sair da conta, não deixa as notificações de quem saiu na tela.
+      setItems([])
+      setUnread(0)
+      setLatest(null)
     }
   }, [isAuthenticated])
 
@@ -83,10 +72,4 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       {children}
     </NotificationContext.Provider>
   )
-}
-
-export function useNotifications(): NotificationContextValue {
-  const ctx = useContext(NotificationContext)
-  if (!ctx) throw new Error('useNotifications must be used inside NotificationProvider')
-  return ctx
 }

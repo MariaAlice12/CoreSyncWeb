@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import './style.css'
 import { getEventById, getEventPhotos, uploadEventPhotos, deleteEventPhoto } from '../../services/event.service'
 import { registerInEvent, getEventParticipants, updateEventRegistration } from '../../services/eventRegistration.service'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import type { Event, EventPhoto, EventRegistration } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
 

@@ -6,7 +6,7 @@ import Select from '../../components/Select'
 import Button from '../../components/Button'
 import useForm from '../../hooks/useForm'
 import { login, register } from '../../services/auth.service'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import { SHIFT_LABELS, type RegisterPayload, type Shift } from '../../types'
 
 const ROLE_OPTIONS = [

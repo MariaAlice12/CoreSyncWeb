@@ -8,7 +8,7 @@ import ModalityInput from '../../components/ModalityInput'
 import useForm from '../../hooks/useForm'
 import { createTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import { type TrainingPayload, type User } from '../../types'
 
 

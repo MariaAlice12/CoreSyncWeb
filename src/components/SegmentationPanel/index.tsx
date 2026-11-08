@@ -138,18 +138,24 @@ function SegmentChart({ title, rows, label }: { title: string; rows: SegmentRow[
 /** BI do admin: participação segmentada por modalidade, nível, curso, turno e campus. */
 function SegmentationPanel({ trainings, users }: SegmentationPanelProps) {
   const [filters, setFilters] = useState<Filters>(EMPTY)
-  const [data, setData] = useState<Segmentation | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  // Resultado guardado junto com os filtros que o geraram: "carregando" e
+  // "erro" são derivados, e uma resposta atrasada não sobrescreve a atual.
+  // Enquanto os novos filtros carregam, os dados anteriores continuam na tela.
+  const [result, setResult] = useState<{ filters: Filters; data: Segmentation | null; failed: boolean } | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    setError('')
+    let active = true
     getSegmentation(filters)
-      .then(setData)
-      .catch(() => setError('Não foi possível carregar a segmentação'))
-      .finally(() => setLoading(false))
+      .then(data => active && setResult({ filters, data, failed: false }))
+      .catch(() => active && setResult(prev => ({ filters, data: prev?.data ?? null, failed: true })))
+    return () => {
+      active = false
+    }
   }, [filters])
+
+  const data = result?.data ?? null
+  const loading = result?.filters !== filters
+  const error = !loading && result?.failed ? 'Não foi possível carregar a segmentação' : ''
 
   const athletes = users.filter(u => u.userType === 'aluno')
   const options = {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import './style.css'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth'
 import { getUserById, updateUser } from '../../services/user.service'
 import StravaConnect from '../../components/StravaConnect'
 import { SHIFT_LABELS, type Shift, type User } from '../../types'
