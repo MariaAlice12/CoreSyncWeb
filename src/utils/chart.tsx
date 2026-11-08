@@ -32,3 +32,6 @@ export const LEGEND = {
 
 /** Cantos arredondados só na ponta da barra (a base fica no eixo). */
 export const BAR_RADIUS: [number, number, number, number] = [4, 4, 0, 0]
+
+/** Barra horizontal: arredonda só a ponta direita. */
+export const BAR_RADIUS_H: [number, number, number, number] = [0, 4, 4, 0]

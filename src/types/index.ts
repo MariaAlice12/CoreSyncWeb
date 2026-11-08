@@ -288,14 +288,25 @@ export interface SegmentRow {
   key: string
   enrollments: number
   attendances: number
+  /** Presenças das matrículas ativas desde a data da matrícula. */
+  presentSessions: number
+  /** Sessões previstas para as matrículas ativas nos últimos 30 dias. */
+  expectedSessions: number
+  /** Presenças ÷ sessões previstas (null quando não há sessão prevista). */
+  frequencyPct: number | null
 }
 
 export interface Segmentation {
   totals: {
     athletes: number
     enrolledAthletes: number
+    notEnrolledAthletes: number
+    notEnrolledPct: number | null
     activeEnrollments: number
     attendancesLast30Days: number
+    presentSessions: number
+    expectedSessions: number
+    frequencyPct: number | null
   }
   byModality: SegmentRow[]
   byLevel: SegmentRow[]

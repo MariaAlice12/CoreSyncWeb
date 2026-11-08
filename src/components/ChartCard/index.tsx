@@ -6,10 +6,12 @@ interface ChartCardProps {
   subtitle?: string
   /** Mesmos dados do gráfico em forma de tabela (alternativa acessível). */
   table: { columns: string[]; rows: (string | number)[][] }
+  /** Altura da área do gráfico em px (padrão 240). */
+  height?: number
   children: ReactNode
 }
 
-function ChartCard({ title, subtitle, table, children }: ChartCardProps) {
+function ChartCard({ title, subtitle, table, height = 240, children }: ChartCardProps) {
   const [showTable, setShowTable] = useState(false)
 
   return (
@@ -24,7 +26,7 @@ function ChartCard({ title, subtitle, table, children }: ChartCardProps) {
         </button>
       </header>
       {showTable ? (
-        <div className="chart-card__table-wrap">
+        <div className="chart-card__table-wrap" style={{ maxHeight: height }}>
           <table className="chart-card__table">
             <thead>
               <tr>{table.columns.map(c => <th key={c}>{c}</th>)}</tr>
@@ -37,7 +39,7 @@ function ChartCard({ title, subtitle, table, children }: ChartCardProps) {
           </table>
         </div>
       ) : (
-        <div className="chart-card__plot">{children}</div>
+        <div className="chart-card__plot" style={{ height }}>{children}</div>
       )}
     </section>
   )
