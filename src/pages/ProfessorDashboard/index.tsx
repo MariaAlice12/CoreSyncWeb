@@ -8,7 +8,7 @@ import { getTrainings, getAllEnrollments, deleteTraining, removeEnrollment } fro
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAllEventRegistrations, removeEventRegistration } from '../../services/eventRegistration.service'
 import { getProfessorPerformance } from '../../services/analytics.service'
-import { LEVEL_LABELS, type Training, type Enrollment, type Event, type EventRegistration, type ProfessorPerformance } from '../../types'
+import { type Training, type Enrollment, type Event, type EventRegistration, type ProfessorPerformance } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
 import TrainingAttendance from '../../components/TrainingAttendance'
 import AthletePerformanceView from '../../components/AthletePerformanceView'
@@ -206,7 +206,6 @@ function ProfessorDashboard() {
                       {formatWeekdays(t.weekdays)} · {t.hour} · {t.address}
                     </span>
                   </div>
-                  <span className="training-row__level">{LEVEL_LABELS[t.level] ?? t.level}</span>
                   <span className="training-row__level">{t.maxStudents} vagas</span>
                   <div className="training-row__actions">
                     <button

@@ -8,9 +8,8 @@ import ModalityInput from '../../components/ModalityInput'
 import { getTrainingById, updateTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
 import { useAuth } from '../../contexts/AuthContext'
-import { LEVEL_LABELS, type TrainingLevel, type TrainingPayload, type User } from '../../types'
+import { type TrainingPayload, type User } from '../../types'
 
-const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label }))
 
 const DIAS = [
   { value: 'segunda', label: 'Seg' },
@@ -38,7 +37,6 @@ function EditTraining() {
   const [maxStudents, setMaxStudents] = useState('')
   const [minStudents, setMinStudents] = useState('')
   const [professorId, setProfessorId] = useState('')
-  const [level, setLevel] = useState<TrainingLevel>('iniciante')
   const [campus, setCampus] = useState('')
   const [professors, setProfessors] = useState<User[]>([])
   const { userRole } = useAuth()
@@ -56,7 +54,6 @@ function EditTraining() {
         setMaxStudents(String(t.maxStudents))
         setMinStudents(String(t.minStudents))
         setProfessorId(t.professor ? String(t.professor.id) : '')
-        setLevel(t.level ?? 'iniciante')
         setCampus(t.campus ?? '')
       })
       .catch(() => setError('Não foi possível carregar o treino'))
@@ -93,7 +90,6 @@ function EditTraining() {
         description: description || undefined,
         maxStudents: Number(maxStudents),
         minStudents: Number(minStudents),
-        level,
         campus,
         ...(userRole === 'admin' && professorId ? { professorId: Number(professorId) } : {}),
       }
@@ -122,13 +118,6 @@ function EditTraining() {
         <div className="form-section">
           <h2>Informações do Treino</h2>
           <ModalityInput value={modality} onChange={setModality} />
-          <Select
-            name="level"
-            label="Nível dos atletas"
-            options={LEVEL_OPTIONS}
-            value={level}
-            onChange={e => setLevel(e.target.value as TrainingLevel)}
-          />
           {userRole === 'admin' && (
             <Select
               name="professorId"

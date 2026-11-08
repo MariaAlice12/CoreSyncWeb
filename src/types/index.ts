@@ -39,7 +39,6 @@ export interface TrainingPayload {
   description?: string
   maxStudents: number
   minStudents: number
-  level?: TrainingLevel
   campus?: string
   professorId?: number
 }
@@ -77,7 +76,6 @@ export interface Training {
   active: boolean
   maxStudents: number
   minStudents: number
-  level: TrainingLevel
   campus?: string | null
   professor?: { id: number; name: string; email: string } | null
 }
@@ -87,6 +85,8 @@ export interface Enrollment {
   user: { id: number; name: string; email: string; userType: string }
   training: Training
   active: boolean
+  /** Autoavaliação do atleta na matrícula (só informativo para o professor) */
+  selfLevel?: TrainingLevel | null
 }
 
 export interface TournamentBracket {

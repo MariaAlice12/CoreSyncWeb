@@ -13,7 +13,7 @@ import { getMyEnrollments, getTrainings } from '../../services/training.service'
 import { getEvents } from '../../services/event.service'
 import { getMyEventRegistrations } from '../../services/eventRegistration.service'
 import { weekdayIndex } from '../../utils/schedule'
-import { LEVEL_LABELS, type Event, type Training } from '../../types'
+import { type Event, type Training } from '../../types'
 
 const TRAINING_COLOR = '#6366f1'
 const EVENT_COLOR = '#0d9488'
@@ -28,7 +28,7 @@ function endTime(hour: string, minutes = 90) {
 function trainingToEvent(t: Training): EventInput {
   return {
     id: `training-${t.id}`,
-    title: `${t.modality} · ${LEVEL_LABELS[t.level] ?? t.level}`,
+    title: t.modality,
     daysOfWeek: t.weekdays.map(weekdayIndex).filter((d): d is number => d !== undefined),
     startTime: t.hour,
     endTime: endTime(t.hour, t.durationMinutes),

@@ -11,7 +11,7 @@ import StravaConnect from '../../components/StravaConnect'
 import AthletePerformanceView from '../../components/AthletePerformanceView'
 import { getMyAttendances } from '../../services/attendance.service'
 import AttendanceSessions from '../../components/AttendanceSessions'
-import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration } from '../../types'
+import { type Attendance, type Training, type Enrollment, type Event, type EventRegistration } from '../../types'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useNotifications } from '../../contexts/NotificationContext'
 
@@ -27,7 +27,6 @@ function TrainingCard({ training, action, children }: { training: Training; acti
     <div className="training-card">
       <div className="training-card__heading">
         <p className="training-card__title">{training.modality}</p>
-        {training.level && <span className="level-badge">{LEVEL_LABELS[training.level] ?? training.level}</span>}
       </div>
       <p className="training-card__detail">
         {(training.weekdays ?? []).map(d => WEEKDAY_LABEL[d] ?? d).join(', ')} · {training.hour}
@@ -98,7 +97,6 @@ function StudentDashboard() {
   const [errorAvailable, setErrorAvailable] = useState('')
   const [errorEnrolled, setErrorEnrolled] = useState('')
   const [modalityFilter, setModalityFilter] = useState('')
-  const [levelFilter, setLevelFilter] = useState('')
   const { signOut, userId } = useAuth()
   const navigate = useNavigate()
 
@@ -222,8 +220,7 @@ function StudentDashboard() {
   const modalities = [...new Set(available.map(t => t.modality))].sort()
   const filteredAvailable = available.filter(t =>
     t.active !== false &&
-    (!modalityFilter || t.modality === modalityFilter) &&
-    (!levelFilter || t.level === levelFilter),
+    (!modalityFilter || t.modality === modalityFilter),
   )
 
   const myEventRegs = userId ? eventRegs.filter(r => r.user?.id === userId) : []
@@ -282,12 +279,6 @@ function StudentDashboard() {
               <select className="filter-bar__select" value={modalityFilter} onChange={e => setModalityFilter(e.target.value)}>
                 <option value="">Todas as modalidades</option>
                 {modalities.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-              <select className="filter-bar__select" value={levelFilter} onChange={e => setLevelFilter(e.target.value)}>
-                <option value="">Todos os níveis</option>
-                {Object.entries(LEVEL_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
               </select>
             </div>
             {loadingAvailable && <p className="empty-state">Carregando...</p>}

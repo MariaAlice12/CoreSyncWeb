@@ -9,7 +9,7 @@ import { getUsers, deleteUser, updateUser } from '../../services/user.service'
 import { getTrainings, deleteTraining } from '../../services/training.service'
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAdminOverview } from '../../services/analytics.service'
-import { LEVEL_LABELS, SHIFT_LABELS, type User, type Training, type Event, type AdminOverview, type Shift } from '../../types'
+import { SHIFT_LABELS, type User, type Training, type Event, type AdminOverview, type Shift } from '../../types'
 
 type Tab = 'professores' | 'atletas' | 'treinos' | 'eventos' | 'insights'
 
@@ -232,7 +232,6 @@ function AdminDashboard() {
                       {(t.weekdays ?? []).map(d => WEEKDAY_LABEL[d] ?? d).join(', ')} · {t.hour} · {t.address}
                     </span>
                   </div>
-                  <span className="admin-row__badge">{LEVEL_LABELS[t.level] ?? t.level}</span>
                   <span className="admin-row__badge">{t.maxStudents} vagas</span>
                   <div className="admin-row__actions">
                     <button className="row-btn row-btn--edit" onClick={() => navigate(`/editar-treino/${t.id}`)}>Editar</button>
