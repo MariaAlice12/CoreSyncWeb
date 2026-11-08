@@ -15,7 +15,7 @@ const EMPTY: Filters = { modality: '', level: '', course: '', shift: '', campus:
 
 const DIMENSIONS: { key: keyof Omit<Segmentation, 'totals'>; title: string; label?: (k: string) => string }[] = [
   { key: 'byModality', title: 'Por modalidade' },
-  { key: 'byLevel', title: 'Por nível', label: k => LEVEL_LABELS[k as keyof typeof LEVEL_LABELS] ?? k },
+  { key: 'byLevel', title: 'Por nível (autoavaliação)', label: k => LEVEL_LABELS[k as keyof typeof LEVEL_LABELS] ?? k },
   { key: 'byCourse', title: 'Por curso' },
   { key: 'byShift', title: 'Por turno', label: k => SHIFT_LABELS[k as keyof typeof SHIFT_LABELS] ?? k },
   { key: 'byCampus', title: 'Por campus' },
@@ -86,7 +86,7 @@ function SegmentationPanel({ trainings, users }: SegmentationPanelProps) {
           <option value="">Todas as modalidades</option>
           {options.modality.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
-        <select className="filter-bar__select" aria-label="Nível" value={filters.level} onChange={set('level')}>
+        <select className="filter-bar__select" aria-label="Nível (autoavaliação)" value={filters.level} onChange={set('level')}>
           <option value="">Todos os níveis</option>
           {Object.entries(LEVEL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
