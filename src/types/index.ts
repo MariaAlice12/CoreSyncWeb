@@ -207,10 +207,61 @@ export interface Attendance {
   user: { id: number; name: string }
 }
 
+export interface PerformanceMetric {
+  name: string
+  value: number
+  unit?: string
+}
+
+/** Desempenho do atleta em uma sessão, registrado pelo professor */
+export interface PerformanceRecord {
+  id: number
+  rating: number | null
+  notes: string | null
+  metrics: PerformanceMetric[]
+  updatedAt: string
+}
+
+export interface PerformanceInput {
+  rating?: number
+  notes?: string
+  metrics?: PerformanceMetric[]
+}
+
+/** Atividade do Strava do atleta no dia da sessão */
+export interface SessionActivity {
+  id: number
+  stravaId: string
+  name: string
+  type: string
+  distance: number
+  movingTime: number
+  /** segundos por km */
+  pace: number | null
+  averageHeartrate: number | null
+  startDate: string
+}
+
+export interface SessionAttendee {
+  id: number
+  name: string
+  attendanceId: number
+  activity: SessionActivity | null
+  performance: PerformanceRecord | null
+}
+
 export interface AttendanceSession {
   date: string
   count: number
-  attendees: { id: number; name: string; attendanceId: number }[]
+  attendees: SessionAttendee[]
+}
+
+export interface AthleteSession {
+  attendanceId: number
+  date: string
+  training: { id: number; modality: string }
+  activity: SessionActivity | null
+  performance: PerformanceRecord | null
 }
 
 export interface AppNotification {
@@ -263,5 +314,7 @@ export interface AthletePerformance {
   }
   attendanceByWeek: { week: string; count: number }[]
   attendanceByModality: { modality: string; count: number }[]
+  ratingByWeek: { week: string; average: number; count: number }[]
+  sessions: AthleteSession[]
   activities: StravaActivity[]
 }

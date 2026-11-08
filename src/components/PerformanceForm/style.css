@@ -1,0 +1,145 @@
+.perf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f7f7fb;
+  border: 1px solid #ececf2;
+}
+
+.perf-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perf-form__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.perf-form__stars {
+  display: flex;
+  gap: 2px;
+}
+
+.perf-form__star {
+  background: none;
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  padding: 2px;
+  color: #d4d4de;
+  cursor: pointer;
+}
+
+.perf-form__star--on {
+  color: #f59e0b;
+}
+
+.perf-form__star:focus-visible {
+  outline: 2px solid var(--color-primary);
+  border-radius: 4px;
+}
+
+.perf-form__notes,
+.perf-form__metric input {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid #dcdce6;
+  border-radius: 8px;
+  background: white;
+  min-width: 0;
+}
+
+.perf-form__notes {
+  resize: vertical;
+}
+
+.perf-form__metric {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 32px;
+  gap: 6px;
+}
+
+.perf-form__remove {
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+}
+
+.perf-form__remove:hover {
+  color: #dc2626;
+}
+
+.perf-form__add {
+  align-self: flex-start;
+  border: 1px dashed #c9c9d3;
+  background: white;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.perf-form__error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.perf-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.perf-form__actions button {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.perf-form__save {
+  background: var(--color-primary);
+  color: white;
+}
+
+.perf-form__cancel {
+  background: white;
+  border-color: #dcdce6 !important;
+  color: #555;
+}
+
+.perf-form__delete {
+  margin-right: auto;
+  background: none;
+  color: #dc2626;
+}
+
+.perf-form__actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 480px) {
+  .perf-form__metric {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px;
+  }
+
+  .perf-form__metric input:first-child {
+    grid-column: 1 / -1;
+  }
+}

@@ -12,7 +12,8 @@ import AthletePerformanceView from '../../components/AthletePerformanceView'
 import { getMyAttendances } from '../../services/attendance.service'
 import AttendanceSessions from '../../components/AttendanceSessions'
 import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration } from '../../types'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNotifications } from '../../contexts/NotificationContext'
 
 type Tab = 'matricula' | 'meus-treinos' | 'cancelados' | 'eventos' | 'strava'
 
@@ -75,6 +76,21 @@ function StudentDashboard() {
   const [syncError, setSyncError] = useState('')
   const [stravaConnected, setStravaConnected] = useState(false)
   const [performanceVersion, setPerformanceVersion] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { latest } = useNotifications()
+
+  // Link das notificações de desempenho: /dashboard/atleta?tab=desempenho
+  useEffect(() => {
+    if (searchParams.get('tab') !== 'desempenho') return
+    setTab('strava')
+    setPerformanceVersion(v => v + 1)
+    setSearchParams({}, { replace: true })
+  }, [searchParams, setSearchParams])
+
+  // Professor registrou desempenho: atualiza o painel em tempo real.
+  useEffect(() => {
+    if (latest?.type === 'performance_recorded') setPerformanceVersion(v => v + 1)
+  }, [latest])
   const [enrollingId, setEnrollingId] = useState<number | null>(null)
   const [confirmUnenrollId, setConfirmUnenrollId] = useState<number | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
@@ -429,7 +445,7 @@ function StudentDashboard() {
             </div>
             <StravaConnect onStatusChange={s => setStravaConnected(s.connected)} />
             {syncError && <p className="empty-state error">{syncError}</p>}
-            {userId && <AthletePerformanceView key={performanceVersion} athleteId={userId} />}
+            {userId && <AthletePerformanceView key={performanceVersion} athleteId={userId} shareable />}
           </>
         )}
       </main>

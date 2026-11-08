@@ -113,3 +113,95 @@
 .performance__modality-name {
   text-transform: capitalize;
 }
+
+.session-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.session-item {
+  background: white;
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.session-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.session-item__modality {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  text-transform: capitalize;
+}
+
+.session-item__date {
+  font-size: 12px;
+  color: #888;
+}
+
+.session-item__stars {
+  color: #f59e0b;
+  font-size: 16px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.session-item__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.session-item__metric {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4338ca;
+  background: #eef2ff;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.session-item__notes {
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.session-item__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.session-item__strava {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c2410c;
+  text-decoration: none;
+}
+
+.session-item__strava:hover {
+  text-decoration: underline;
+}
+
+.session-item__muted {
+  font-size: 12px;
+  color: #aaa;
+}

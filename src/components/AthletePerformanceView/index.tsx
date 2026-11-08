@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import ChartCard from '../ChartCard'
+import ShareResult from '../ShareResult'
+import type { ShareCardData } from '../ShareResult/card'
 import { getAthletePerformance } from '../../services/analytics.service'
 import { formatPace, formatSeconds, parseISODate } from '../../utils/schedule'
 import { AXIS, BAR_RADIUS, GRID, SERIES, TOOLTIP } from '../../utils/chart'
-import type { AthletePerformance } from '../../types'
+import { activitySummary, formatMetric, ratingStars } from '../../utils/performance'
+import type { AthletePerformance, AthleteSession, StravaActivity } from '../../types'
 import './style.css'
 
 const RECENT_WEEKS = 12
@@ -15,8 +18,45 @@ function shortDate(value: string) {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
-/** Indicadores, gráficos e atividades do atleta (presenças + Strava). */
-function AthletePerformanceView({ athleteId }: { athleteId: number }) {
+const RECENT_SESSIONS = 10
+
+function longDate(value: string) {
+  const d = value.length === 10 ? parseISODate(value) : new Date(value)
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+}
+
+function activityShare(name: string, a: StravaActivity): ShareCardData {
+  const stats = [
+    ...(a.distance > 0 ? [{ label: 'distância', value: `${(a.distance / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km` }] : []),
+    { label: 'tempo', value: formatSeconds(a.movingTime) },
+    ...(a.pace ? [{ label: 'ritmo', value: formatPace(a.pace) }] : []),
+    ...(a.averageHeartrate ? [{ label: 'FC média', value: `${Math.round(a.averageHeartrate)} bpm` }] : []),
+  ]
+  return { athleteName: name, title: a.name, subtitle: a.sportType ?? a.type, date: longDate(a.startDate), stats, source: 'strava' }
+}
+
+function sessionShare(name: string, s: AthleteSession): ShareCardData {
+  const perf = s.performance
+  const stats = [
+    ...(perf?.metrics ?? []).map(m => ({ label: m.name, value: `${m.value.toLocaleString('pt-BR')}${m.unit ? ` ${m.unit}` : ''}` })),
+    ...(s.activity && s.activity.distance > 0
+      ? [{ label: 'distância', value: `${(s.activity.distance / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km` }]
+      : []),
+    ...(s.activity?.averageHeartrate ? [{ label: 'FC média', value: `${Math.round(s.activity.averageHeartrate)} bpm` }] : []),
+  ]
+  return {
+    athleteName: name,
+    title: `Treino de ${s.training.modality}`,
+    date: longDate(s.date),
+    stats,
+    rating: perf?.rating,
+    notes: perf?.notes,
+    source: 'coresync',
+  }
+}
+
+/** Indicadores, gráficos e atividades do atleta (presenças + Strava + desempenho registrado). */
+function AthletePerformanceView({ athleteId, shareable = false }: { athleteId: number; shareable?: boolean }) {
   const [data, setData] = useState<AthletePerformance | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -42,6 +82,8 @@ function AthletePerformanceView({ athleteId }: { athleteId: number }) {
     km: Math.round(a.distance / 10) / 100,
   }))
   const latestFirst = [...data.activities].reverse()
+  const ratings = data.ratingByWeek.slice(-RECENT_WEEKS).map(r => ({ ...r, label: shortDate(r.week) }))
+  const sessions = data.sessions.filter(s => s.activity || s.performance).slice(0, RECENT_SESSIONS)
 
   return (
     <div className="performance">
@@ -123,6 +165,74 @@ function AthletePerformanceView({ athleteId }: { athleteId: number }) {
         </ChartCard>
       </div>
 
+      {ratings.length > 0 && (
+        <ChartCard
+          title="Avaliação do professor"
+          subtitle="Nota média por semana (1 a 5)"
+          table={{ columns: ['Semana de', 'Nota média', 'Sessões avaliadas'], rows: ratings.map(r => [r.label, r.average.toLocaleString('pt-BR'), r.count]) }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={ratings} margin={{ top: 8, right: 16, bottom: 0, left: -24 }}>
+              <CartesianGrid {...GRID} />
+              <XAxis dataKey="label" {...AXIS} />
+              <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} {...AXIS} axisLine={false} />
+              <Tooltip
+                {...TOOLTIP}
+                labelFormatter={l => `Semana de ${l}`}
+                formatter={(value, _n, item) => [`${Number(value).toLocaleString('pt-BR')} (${item.payload.count} ${item.payload.count === 1 ? 'sessão' : 'sessões'})`, 'Nota média']}
+              />
+              <Line type="monotone" dataKey="average" name="Nota média" stroke={SERIES[0]} strokeWidth={2} dot={{ r: 4, fill: SERIES[0] }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      )}
+
+      {sessions.length > 0 && (
+        <>
+          <h3 className="performance__subtitle">Sessões de treino</h3>
+          <div className="session-list">
+            {sessions.map(s => (
+              <div key={s.attendanceId} className="session-item">
+                <div className="session-item__header">
+                  <div>
+                    <span className="session-item__modality">{s.training.modality}</span>
+                    <span className="session-item__date">{longDate(s.date)}</span>
+                  </div>
+                  {s.performance?.rating ? (
+                    <span className="session-item__stars" aria-label={`Nota ${s.performance.rating} de 5`}>
+                      {ratingStars(s.performance.rating)}
+                    </span>
+                  ) : null}
+                </div>
+                {s.performance && s.performance.metrics.length > 0 && (
+                  <div className="session-item__metrics">
+                    {s.performance.metrics.map((m, i) => (
+                      <span key={i} className="session-item__metric">{formatMetric(m)}</span>
+                    ))}
+                  </div>
+                )}
+                {s.performance?.notes && <p className="session-item__notes">“{s.performance.notes}”</p>}
+                <div className="session-item__footer">
+                  {s.activity ? (
+                    <a
+                      className="session-item__strava"
+                      href={`https://www.strava.com/activities/${s.activity.stravaId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Strava: {activitySummary(s.activity)}
+                    </a>
+                  ) : (
+                    <span className="session-item__muted">Sem atividade do Strava neste dia</span>
+                  )}
+                  {shareable && <ShareResult data={sessionShare(data.athlete.name, s)} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {data.attendanceByModality.length > 0 && (
         <div className="performance__modalities">
           {data.attendanceByModality.map(m => (
@@ -175,8 +285,9 @@ function AthletePerformanceView({ athleteId }: { athleteId: number }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Ver e compartilhar no Strava
+                    Ver no Strava
                   </a>
+                  {shareable && <ShareResult data={activityShare(data.athlete.name, a)} />}
                 </div>
               </div>
             ))}
