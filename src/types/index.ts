@@ -33,6 +33,7 @@ export interface RegisterPayload {
 export interface TrainingPayload {
   modality: string
   hour: string
+  durationMinutes?: number
   address: string
   weekdays: string[]
   description?: string
@@ -68,6 +69,8 @@ export interface Training {
   id: number
   modality: string
   hour: string
+  /** minutos (padrão 90) */
+  durationMinutes?: number
   address: string
   weekdays: string[]
   description?: string

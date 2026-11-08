@@ -18,10 +18,11 @@ import { LEVEL_LABELS, type Event, type Training } from '../../types'
 const TRAINING_COLOR = '#6366f1'
 const EVENT_COLOR = '#0d9488'
 
-/** Soma uma hora ao horário "HH:mm" (duração padrão de um treino na agenda). */
-function plusOneHour(hour: string) {
+/** "HH:mm" + duração do treino (padrão 90 min), limitado ao fim do dia. */
+function endTime(hour: string, minutes = 90) {
   const [h, m] = hour.split(':').map(Number)
-  return `${String(Math.min(h + 1, 23)).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`
+  const total = Math.min(h * 60 + (m || 0) + minutes, 23 * 60 + 59)
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
 function trainingToEvent(t: Training): EventInput {
@@ -30,7 +31,7 @@ function trainingToEvent(t: Training): EventInput {
     title: `${t.modality} · ${LEVEL_LABELS[t.level] ?? t.level}`,
     daysOfWeek: t.weekdays.map(weekdayIndex).filter((d): d is number => d !== undefined),
     startTime: t.hour,
-    endTime: plusOneHour(t.hour),
+    endTime: endTime(t.hour, t.durationMinutes),
     color: TRAINING_COLOR,
     extendedProps: { kind: 'training', place: t.address },
   }

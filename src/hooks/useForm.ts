@@ -16,7 +16,7 @@ function useForm<T extends Record<string, string>>(initialValues: T) {
     setValues(initialValues)
   }
 
-  return { values, handleChange, reset }
+  return { values, handleChange, reset, setValues }
 }
 
 export default useForm

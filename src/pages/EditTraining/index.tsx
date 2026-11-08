@@ -4,18 +4,11 @@ import '../CreateTraining/style.css'
 import Input from '../../components/Input'
 import Select from '../../components/Select'
 import Button from '../../components/Button'
+import ModalityInput from '../../components/ModalityInput'
 import { getTrainingById, updateTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
 import { useAuth } from '../../contexts/AuthContext'
 import { LEVEL_LABELS, type TrainingLevel, type TrainingPayload, type User } from '../../types'
-
-const MODALIDADE_OPTIONS = [
-  { value: 'atletismo', label: 'Atletismo' },
-  { value: 'futebol', label: 'Futebol' },
-  { value: 'volei', label: 'Vôlei' },
-  { value: 'basquete', label: 'Basquete' },
-  { value: 'judo', label: 'Judô' },
-]
 
 const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label }))
 
@@ -39,6 +32,7 @@ function EditTraining() {
   const [modality, setModality] = useState('')
   const [weekdays, setWeekdays] = useState<string[]>([])
   const [hour, setHour] = useState('')
+  const [durationMinutes, setDurationMinutes] = useState('90')
   const [address, setAddress] = useState('')
   const [description, setDescription] = useState('')
   const [maxStudents, setMaxStudents] = useState('')
@@ -56,6 +50,7 @@ function EditTraining() {
         setModality(t.modality)
         setWeekdays(t.weekdays ?? [])
         setHour(t.hour)
+        setDurationMinutes(String(t.durationMinutes ?? 90))
         setAddress(t.address)
         setDescription(t.description ?? '')
         setMaxStudents(String(t.maxStudents))
@@ -92,6 +87,7 @@ function EditTraining() {
       const payload: Partial<TrainingPayload> = {
         modality,
         hour,
+        durationMinutes: Number(durationMinutes) || 90,
         address,
         weekdays,
         description: description || undefined,
@@ -125,13 +121,7 @@ function EditTraining() {
 
         <div className="form-section">
           <h2>Informações do Treino</h2>
-          <Select
-            name="modality"
-            placeholder="Modalidade"
-            options={MODALIDADE_OPTIONS}
-            value={modality}
-            onChange={e => setModality(e.target.value)}
-          />
+          <ModalityInput value={modality} onChange={setModality} />
           <Select
             name="level"
             label="Nível dos atletas"
@@ -170,7 +160,20 @@ function EditTraining() {
               </button>
             ))}
           </div>
-          <Input name="hour" type="time" value={hour} onChange={e => setHour(e.target.value)} />
+          <div className="row">
+            <Input name="hour" type="time" label="Início" required value={hour} onChange={e => setHour(e.target.value)} />
+            <Input
+              name="durationMinutes"
+              type="number"
+              label="Duração (min)"
+              min={15}
+              max={300}
+              step={5}
+              required
+              value={durationMinutes}
+              onChange={e => setDurationMinutes(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="form-section">

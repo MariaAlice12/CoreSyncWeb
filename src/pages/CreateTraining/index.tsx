@@ -4,19 +4,12 @@ import './style.css'
 import Input from '../../components/Input'
 import Select from '../../components/Select'
 import Button from '../../components/Button'
+import ModalityInput from '../../components/ModalityInput'
 import useForm from '../../hooks/useForm'
 import { createTraining } from '../../services/training.service'
 import { getUsers } from '../../services/user.service'
 import { useAuth } from '../../contexts/AuthContext'
 import { LEVEL_LABELS, type TrainingLevel, type TrainingPayload, type User } from '../../types'
-
-const MODALIDADE_OPTIONS = [
-  { value: 'atletismo', label: 'Atletismo' },
-  { value: 'futebol', label: 'Futebol' },
-  { value: 'volei', label: 'Vôlei' },
-  { value: 'basquete', label: 'Basquete' },
-  { value: 'judo', label: 'Judô' },
-]
 
 const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([value, label]) => ({ value, label }))
 
@@ -33,6 +26,7 @@ const DIAS = [
 const INITIAL = {
   modality: '',
   hour: '',
+  durationMinutes: '90',
   address: '',
   description: '',
   maxStudents: '',
@@ -49,7 +43,7 @@ function CreateTraining() {
   const [professors, setProfessors] = useState<User[]>([])
   const navigate = useNavigate()
   const { userRole } = useAuth()
-  const { values, handleChange } = useForm(INITIAL)
+  const { values, handleChange, setValues } = useForm(INITIAL)
 
   useEffect(() => {
     if (userRole === 'admin') {
@@ -79,6 +73,7 @@ function CreateTraining() {
       const payload: TrainingPayload = {
         modality: values.modality,
         hour: values.hour,
+        durationMinutes: Number(values.durationMinutes) || 90,
         address: values.address,
         weekdays,
         description: values.description || undefined,
@@ -104,7 +99,7 @@ function CreateTraining() {
 
         <div className="form-section">
           <h2>Informações do Treino</h2>
-          <Select name="modality" placeholder="Modalidade" options={MODALIDADE_OPTIONS} value={values.modality} onChange={handleChange} />
+          <ModalityInput value={values.modality} onChange={modality => setValues(v => ({ ...v, modality }))} />
           <Select name="level" label="Nível dos atletas" options={LEVEL_OPTIONS} value={values.level} onChange={handleChange} />
           {userRole === 'admin' && (
             <Select
@@ -137,7 +132,20 @@ function CreateTraining() {
               </button>
             ))}
           </div>
-          <Input name="hour" type="time" value={values.hour} onChange={handleChange} />
+          <div className="row">
+            <Input name="hour" type="time" label="Início" required value={values.hour} onChange={handleChange} />
+            <Input
+              name="durationMinutes"
+              type="number"
+              label="Duração (min)"
+              min={15}
+              max={300}
+              step={5}
+              required
+              value={values.durationMinutes}
+              onChange={handleChange}
+            />
+          </div>
         </div>
 
         <div className="form-section">

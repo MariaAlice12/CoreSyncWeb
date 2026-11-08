@@ -7,6 +7,9 @@ export const createTraining = (payload: TrainingPayload) =>
 export const getTrainings = () =>
   request<Training[]>('/training')
 
+export const getModalities = () =>
+  request<string[]>('/training/modalities')
+
 export const getTrainingById = (id: number) =>
   request<Training>(`/training/${id}`)
 

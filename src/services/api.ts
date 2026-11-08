@@ -17,7 +17,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null)
-    const message = Array.isArray(body?.message) ? body.message.join(', ') : body?.message
+    const message = Array.isArray(body?.message) ? body.message.join('\n') : body?.message
     throw new Error(message ?? `HTTP ${response.status}: ${response.statusText}`)
   }
 
