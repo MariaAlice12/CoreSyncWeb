@@ -8,6 +8,7 @@ import { getTrainings, getAllEnrollments, deleteTraining, removeEnrollment } fro
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAllEventRegistrations, removeEventRegistration } from '../../services/eventRegistration.service'
 import { getProfessorPerformance } from '../../services/analytics.service'
+import LevelSummary, { SelfLevelTag } from '../../components/LevelSummary'
 import { type Training, type Enrollment, type Event, type EventRegistration, type ProfessorPerformance } from '../../types'
 import BracketVisual from '../../components/BracketVisual'
 import TrainingAttendance from '../../components/TrainingAttendance'
@@ -206,6 +207,7 @@ function ProfessorDashboard() {
                       {formatWeekdays(t.weekdays)} · {t.hour} · {t.address}
                     </span>
                   </div>
+                  <LevelSummary enrollments={enrollmentsByTraining[t.id] ?? []} />
                   <span className="training-row__level">{t.maxStudents} vagas</span>
                   <div className="training-row__actions">
                     <button
@@ -246,6 +248,7 @@ function ProfessorDashboard() {
                           {formatWeekdays(t.weekdays)} · {t.hour} · {t.address}
                         </span>
                       </div>
+                      <LevelSummary enrollments={students} />
                       <span className="modality-card__count">
                         {students.length} / {t.maxStudents} alunos
                       </span>
@@ -264,6 +267,7 @@ function ProfessorDashboard() {
                               <span className="student-item__name">{e.user.name}</span>
                               <span className="student-item__email">{e.user.email}</span>
                             </div>
+                            <SelfLevelTag level={e.selfLevel} />
                             <button
                               className="row-btn row-btn--edit"
                               onClick={() => setViewAthlete({ id: e.user.id, name: e.user.name })}
