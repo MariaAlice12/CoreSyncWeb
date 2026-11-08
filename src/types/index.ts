@@ -19,6 +19,13 @@ export const LEVEL_LABELS: Record<TrainingLevel, string> = {
   avancado: 'Avançado',
 }
 
+/** Ajuda o atleta a se autoavaliar na matrícula. */
+export const LEVEL_DESCRIPTIONS: Record<TrainingLevel, string> = {
+  iniciante: 'Nunca praticei ou pratico há pouco tempo.',
+  intermediario: 'Conheço as regras e os fundamentos e jogo com regularidade.',
+  avancado: 'Já compito ou jogo em equipe com tática definida.',
+}
+
 export interface RegisterPayload {
   name: string
   email: string

@@ -11,7 +11,8 @@ import StravaConnect from '../../components/StravaConnect'
 import AthletePerformanceView from '../../components/AthletePerformanceView'
 import { getMyAttendances } from '../../services/attendance.service'
 import AttendanceSessions from '../../components/AttendanceSessions'
-import { type Attendance, type Training, type Enrollment, type Event, type EventRegistration } from '../../types'
+import SelfLevelDialog from '../../components/SelfLevelDialog'
+import { LEVEL_LABELS, type Attendance, type Training, type Enrollment, type Event, type EventRegistration, type TrainingLevel } from '../../types'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useNotifications } from '../../contexts/NotificationContext'
 
@@ -97,6 +98,10 @@ function StudentDashboard() {
   const [errorAvailable, setErrorAvailable] = useState('')
   const [errorEnrolled, setErrorEnrolled] = useState('')
   const [modalityFilter, setModalityFilter] = useState('')
+  // Autoavaliação: ao se matricular ou ao alterar o nível informado.
+  const [levelDialog, setLevelDialog] = useState<
+    { mode: 'enroll'; training: Training } | { mode: 'edit'; enrollment: Enrollment } | null
+  >(null)
   const { signOut, userId } = useAuth()
   const navigate = useNavigate()
 
@@ -127,17 +132,37 @@ function StudentDashboard() {
       .finally(() => setLoadingEvents(false))
   }, [])
 
-  async function handleEnroll(trainingId: number) {
+  async function handleEnroll(trainingId: number, selfLevel: TrainingLevel) {
     if (!userId) return
     setEnrollingId(trainingId)
     try {
-      const enrollment = await enrollInTraining(trainingId, userId)
-      setEnrollments(prev => [...prev, enrollment])
+      const enrollment = await enrollInTraining(trainingId, userId, selfLevel)
+      // Matrícula cancelada é reativada pelo backend (mesmo id).
+      setEnrollments(prev => [...prev.filter(e => e.id !== enrollment.id), enrollment])
     } catch {
       // silently ignore
     } finally {
       setEnrollingId(null)
     }
+  }
+
+  async function handleUpdateLevel(enrollmentId: number, selfLevel: TrainingLevel) {
+    setTogglingId(enrollmentId)
+    try {
+      await updateEnrollment(enrollmentId, { selfLevel })
+      setEnrollments(prev => prev.map(e => e.id === enrollmentId ? { ...e, selfLevel } : e))
+    } catch {
+      setErrorEnrolled('Não foi possível atualizar seu nível')
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  function handleLevelConfirm(level: TrainingLevel) {
+    if (!levelDialog) return
+    if (levelDialog.mode === 'enroll') handleEnroll(levelDialog.training.id, level)
+    else handleUpdateLevel(levelDialog.enrollment.id, level)
+    setLevelDialog(null)
   }
 
   async function handleUnenroll() {
@@ -298,7 +323,7 @@ function StudentDashboard() {
                       <button
                         className="enroll-btn"
                         disabled={enrollingId === t.id || !userId}
-                        onClick={() => handleEnroll(t.id)}
+                        onClick={() => setLevelDialog({ mode: 'enroll', training: t })}
                       >
                         {enrollingId === t.id ? 'Aguarde...' : 'Matricular-se'}
                       </button>
@@ -333,6 +358,17 @@ function StudentDashboard() {
                     </button>
                   }
                 >
+                  <p className="self-level-row">
+                    Seu nível:{' '}
+                    <strong>{e.selfLevel ? LEVEL_LABELS[e.selfLevel] : 'não informado'}</strong>
+                    <button
+                      className="self-level-row__edit"
+                      disabled={togglingId === e.id}
+                      onClick={() => setLevelDialog({ mode: 'edit', enrollment: e })}
+                    >
+                      {e.selfLevel ? 'Alterar' : 'Informar'}
+                    </button>
+                  </p>
                   <AttendanceSessions
                     training={e.training}
                     mine={myAttendances.filter(a => a.training?.id === e.training.id)}
@@ -440,6 +476,16 @@ function StudentDashboard() {
           </>
         )}
       </main>
+
+      {levelDialog && (
+        <SelfLevelDialog
+          modality={levelDialog.mode === 'enroll' ? levelDialog.training.modality : levelDialog.enrollment.training.modality}
+          initial={levelDialog.mode === 'edit' ? levelDialog.enrollment.selfLevel : null}
+          confirmLabel={levelDialog.mode === 'enroll' ? 'Confirmar matrícula' : 'Salvar nível'}
+          onConfirm={handleLevelConfirm}
+          onCancel={() => setLevelDialog(null)}
+        />
+      )}
 
       {confirmUnenrollId !== null && (
         <div className="confirm-overlay">

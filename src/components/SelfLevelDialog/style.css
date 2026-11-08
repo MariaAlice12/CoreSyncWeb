@@ -1,0 +1,98 @@
+.self-level {
+  max-width: 460px;
+}
+
+.self-level__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 6px;
+}
+
+.self-level__hint {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 18px;
+  line-height: 1.4;
+}
+
+.self-level__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.self-level__option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.self-level__option:hover {
+  border-color: var(--color-primary);
+}
+
+.self-level__option--selected {
+  border-color: var(--color-primary);
+  background: #eef2ff;
+}
+
+.self-level__option input {
+  accent-color: var(--color-primary);
+  margin: 0;
+}
+
+.self-level__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+}
+
+.self-level__desc {
+  grid-column: 2;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.self-level__confirm {
+  background: var(--color-primary);
+  color: white;
+}
+
+.self-level__confirm:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.self-level__confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Linha "Seu nível" nos cards do aluno */
+.self-level-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+  margin-top: 8px;
+}
+
+.self-level-row__edit {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
