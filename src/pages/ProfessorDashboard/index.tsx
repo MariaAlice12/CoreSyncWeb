@@ -13,6 +13,8 @@ import { type Training, type Enrollment, type Event, type EventRegistration, typ
 import BracketVisual from '../../components/BracketVisual'
 import TrainingAttendance from '../../components/TrainingAttendance'
 import AthletePerformanceView from '../../components/AthletePerformanceView'
+import ProfessorFilter from '../../components/ProfessorFilter'
+import { filterByProfessor } from '../../utils/professorFilter'
 
 type Tab = 'treinos' | 'alunos' | 'presencas' | 'eventos' | 'desempenho'
 
@@ -45,6 +47,8 @@ function ProfessorDashboard() {
   const [attendanceTrainingId, setAttendanceTrainingId] = useState<number | null>(null)
   const [viewAthlete, setViewAthlete] = useState<{ id: number; name: string } | null>(null)
   const { signOut, userId } = useAuth()
+  // Aba Treinos abre com os treinos do professor logado
+  const [professorFilter, setProfessorFilter] = useState(userId != null ? String(userId) : '')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -131,6 +135,7 @@ function ProfessorDashboard() {
   }, {})
 
   const myTrainings = trainings.filter(t => t.professor?.id === userId)
+  const shownTrainings = filterByProfessor(trainings, professorFilter)
   const attendanceTraining =
     myTrainings.find(t => t.id === attendanceTrainingId) ?? myTrainings[0]
 
@@ -194,17 +199,29 @@ function ProfessorDashboard() {
         {tab === 'treinos' && (
           <>
             <h2 className="section-title">Treinos Cadastrados</h2>
+            <div className="filter-bar">
+              <ProfessorFilter
+                trainings={trainings}
+                value={professorFilter}
+                onChange={setProfessorFilter}
+                meId={userId}
+              />
+            </div>
             {loadingTrainings && <p className="empty-state">Carregando...</p>}
             {!loadingTrainings && !error && trainings.length === 0 && (
               <p className="empty-state">Nenhum treino cadastrado ainda.</p>
             )}
+            {!loadingTrainings && !error && trainings.length > 0 && shownTrainings.length === 0 && (
+              <p className="empty-state">Nenhum treino para este professor.</p>
+            )}
             <div className="training-list">
-              {trainings.map(t => (
+              {shownTrainings.map(t => (
                 <div key={t.id} className="training-row">
                   <div className="training-row__info">
                     <span className="training-row__name">{t.modality}</span>
                     <span className="training-row__meta">
                       {formatWeekdays(t.weekdays)} · {t.hour} · {t.address}
+                      {' · '}{t.professor ? `Prof. ${t.professor.name}` : 'Sem professor'}
                     </span>
                   </div>
                   <LevelSummary enrollments={enrollmentsByTraining[t.id] ?? []} />

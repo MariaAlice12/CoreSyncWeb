@@ -9,6 +9,8 @@ import { getUsers, deleteUser, updateUser } from '../../services/user.service'
 import { getTrainings, deleteTraining } from '../../services/training.service'
 import { getEvents, deleteEvent } from '../../services/event.service'
 import { getAdminOverview } from '../../services/analytics.service'
+import ProfessorFilter from '../../components/ProfessorFilter'
+import { filterByProfessor } from '../../utils/professorFilter'
 import { SHIFT_LABELS, type User, type Training, type Event, type AdminOverview, type Shift } from '../../types'
 
 type Tab = 'professores' | 'atletas' | 'treinos' | 'eventos' | 'insights'
@@ -25,6 +27,7 @@ function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('professores')
   const [users, setUsers] = useState<User[]>([])
   const [trainings, setTrainings] = useState<Training[]>([])
+  const [professorFilter, setProfessorFilter] = useState('')
   const [events, setEvents] = useState<Event[]>([])
   const [overview, setOverview] = useState<AdminOverview | null>(null)
   const [loading, setLoading] = useState(true)
@@ -139,6 +142,12 @@ function AdminDashboard() {
   }
 
   const professors = users.filter(u => u.userType === 'professor')
+  const shownTrainings = filterByProfessor(trainings, professorFilter)
+
+  function showProfessorTrainings(professorId: number) {
+    setProfessorFilter(String(professorId))
+    setTab('treinos')
+  }
   const athletes = users.filter(u => u.userType === 'aluno')
 
   const WEEKDAY_LABEL: Record<string, string> = {
@@ -164,6 +173,9 @@ function AdminDashboard() {
               </span>
             </div>
             <div className="admin-user-actions">
+              {u.userType === 'professor' && (
+                <button className="row-btn row-btn--edit" onClick={() => showProfessorTrainings(u.id)}>Ver treinos</button>
+              )}
               <button className="row-btn row-btn--edit" onClick={() => openEditUser(u)}>Editar</button>
               <button className="row-btn row-btn--delete" onClick={() => setConfirmDeleteUser(u.id)}>Remover</button>
             </div>
@@ -221,15 +233,22 @@ function AdminDashboard() {
         {tab === 'treinos' && (
           <>
             <h2 className="section-title">Treinos Cadastrados</h2>
+            <div className="filter-bar">
+              <ProfessorFilter trainings={trainings} value={professorFilter} onChange={setProfessorFilter} />
+            </div>
             {loading && <p className="empty-state">Carregando...</p>}
             {!loading && trainings.length === 0 && <p className="empty-state">Nenhum treino cadastrado.</p>}
+            {!loading && trainings.length > 0 && shownTrainings.length === 0 && (
+              <p className="empty-state">Nenhum treino para este professor.</p>
+            )}
             <div className="admin-list">
-              {trainings.map(t => (
+              {shownTrainings.map(t => (
                 <div key={t.id} className="admin-row">
                   <div className="admin-row__info">
                     <span className="admin-row__name">{t.modality}</span>
                     <span className="admin-row__meta">
                       {(t.weekdays ?? []).map(d => WEEKDAY_LABEL[d] ?? d).join(', ')} · {t.hour} · {t.address}
+                      {' · '}{t.professor ? `Prof. ${t.professor.name}` : 'Sem professor'}
                     </span>
                   </div>
                   <span className="admin-row__badge">{t.maxStudents} vagas</span>
