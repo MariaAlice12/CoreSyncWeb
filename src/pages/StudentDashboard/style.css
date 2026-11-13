@@ -209,6 +209,17 @@
   cursor: not-allowed;
 }
 
+.action-error {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: #fff1f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-input);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .tab-badge {
   display: inline-flex;
   align-items: center;

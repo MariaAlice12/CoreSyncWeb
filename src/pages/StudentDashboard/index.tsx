@@ -92,6 +92,8 @@ function StudentDashboard() {
     if (latest?.type === 'performance_recorded') setPerformanceVersion(v => v + 1)
   }, [latest])
   const [enrollingId, setEnrollingId] = useState<number | null>(null)
+  // Erro da última matrícula/rematrícula, exibido no card correspondente
+  const [actionError, setActionError] = useState<{ key: string; message: string } | null>(null)
   const [confirmUnenrollId, setConfirmUnenrollId] = useState<number | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
   const [registeringEventId, setRegisteringEventId] = useState<number | null>(null)
@@ -135,12 +137,17 @@ function StudentDashboard() {
   async function handleEnroll(trainingId: number, selfLevel: TrainingLevel) {
     if (!userId) return
     setEnrollingId(trainingId)
+    setActionError(null)
     try {
       const enrollment = await enrollInTraining(trainingId, userId, selfLevel)
       // Matrícula cancelada é reativada pelo backend (mesmo id).
       setEnrollments(prev => [...prev.filter(e => e.id !== enrollment.id), enrollment])
-    } catch {
-      // silently ignore
+    } catch (err) {
+      // Ex.: treino lotado (409) — a API já manda a mensagem pronta
+      setActionError({
+        key: `training-${trainingId}`,
+        message: err instanceof Error ? err.message : 'Não foi possível concluir a matrícula',
+      })
     } finally {
       setEnrollingId(null)
     }
@@ -182,12 +189,16 @@ function StudentDashboard() {
 
   async function handleReenroll(enrollmentId: number) {
     setTogglingId(enrollmentId)
+    setActionError(null)
     try {
       await updateEnrollment(enrollmentId, { active: true })
       setEnrollments(prev => prev.map(e => e.id === enrollmentId ? { ...e, active: true } : e))
       setTab('meus-treinos')
-    } catch {
-      // silently ignore
+    } catch (err) {
+      setActionError({
+        key: `enrollment-${enrollmentId}`,
+        message: err instanceof Error ? err.message : 'Não foi possível refazer a matrícula',
+      })
     } finally {
       setTogglingId(null)
     }
@@ -320,13 +331,18 @@ function StudentDashboard() {
                     enrolledTrainingIds.has(t.id) ? (
                       <span className="enrolled-badge">Matriculado</span>
                     ) : (
-                      <button
-                        className="enroll-btn"
-                        disabled={enrollingId === t.id || !userId}
-                        onClick={() => setLevelDialog({ mode: 'enroll', training: t })}
-                      >
-                        {enrollingId === t.id ? 'Aguarde...' : 'Matricular-se'}
-                      </button>
+                      <>
+                        <button
+                          className="enroll-btn"
+                          disabled={enrollingId === t.id || !userId}
+                          onClick={() => setLevelDialog({ mode: 'enroll', training: t })}
+                        >
+                          {enrollingId === t.id ? 'Aguarde...' : 'Matricular-se'}
+                        </button>
+                        {actionError?.key === `training-${t.id}` && (
+                          <p className="action-error" role="alert">{actionError.message}</p>
+                        )}
+                      </>
                     )
                   }
                 />
@@ -394,13 +410,18 @@ function StudentDashboard() {
                   key={e.id}
                   training={e.training}
                   action={
-                    <button
-                      className="reenroll-btn"
-                      disabled={togglingId === e.id}
-                      onClick={() => handleReenroll(e.id)}
-                    >
-                      {togglingId === e.id ? 'Aguarde...' : 'Rematricular-se'}
-                    </button>
+                    <>
+                      <button
+                        className="reenroll-btn"
+                        disabled={togglingId === e.id}
+                        onClick={() => handleReenroll(e.id)}
+                      >
+                        {togglingId === e.id ? 'Aguarde...' : 'Rematricular-se'}
+                      </button>
+                      {actionError?.key === `enrollment-${e.id}` && (
+                        <p className="action-error" role="alert">{actionError.message}</p>
+                      )}
+                    </>
                   }
                 />
               ))}
