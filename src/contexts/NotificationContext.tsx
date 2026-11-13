@@ -27,10 +27,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
 
-    // Socket.IO no namespace /notifications, autenticado com o JWT
-    const socket = io(`${BASE_URL || window.location.origin}/notifications`, {
+    // Socket.IO no namespace /notifications, autenticado com o JWT.
+    // Com a API atrás de proxy (BASE_URL relativo, ex.: "/backend"), o namespace
+    // fica na própria origem e o prefixo vai para o path do Socket.IO.
+    const isRelative = BASE_URL.startsWith('/')
+    const socket = io(`${isRelative ? window.location.origin : BASE_URL || window.location.origin}/notifications`, {
       auth: { token: getToken() },
       transports: ['websocket'],
+      ...(isRelative ? { path: `${BASE_URL}/socket.io` } : {}),
     })
     socket.on('notification', (n: AppNotification) => {
       setItems(prev => [n, ...prev].slice(0, 50))
