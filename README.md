@@ -152,12 +152,16 @@ npm run dev
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ```env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:8080
 ```
 
 | Variável | Descrição |
 |----------|-----------|
-| `VITE_API_URL` | URL base da API REST backend |
+| `VITE_API_URL` | URL base da API REST. Pode ser absoluta (dev) ou um caminho relativo como `/backend` (API atrás de proxy na mesma origem; o Socket.IO usa `/backend/socket.io`) |
+
+### Docker / publicação
+
+O `Dockerfile` gera o build com `VITE_API_URL=/backend` e serve o resultado com nginx (`nginx.conf`). O nginx faz o fallback das rotas do React Router e repassa `/backend/*`, inclusive o WebSocket, para a API. Para subir o sistema completo e publicá-lo na internet, veja a seção **"Publicar a partir do meu PC"** no README do [CoreSync](https://github.com/MariaAlice12/CoreSync).
 
 ---
 
