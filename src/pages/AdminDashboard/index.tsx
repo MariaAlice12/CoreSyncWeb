@@ -234,7 +234,12 @@ function AdminDashboard() {
           <>
             <h2 className="section-title">Treinos Cadastrados</h2>
             <div className="filter-bar">
-              <ProfessorFilter trainings={trainings} value={professorFilter} onChange={setProfessorFilter} />
+              <ProfessorFilter
+                trainings={trainings}
+                value={professorFilter}
+                onChange={setProfessorFilter}
+                professors={professors}
+              />
             </div>
             {loading && <p className="empty-state">Carregando...</p>}
             {!loading && trainings.length === 0 && <p className="empty-state">Nenhum treino cadastrado.</p>}

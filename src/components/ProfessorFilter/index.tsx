@@ -7,10 +7,12 @@ interface Props {
   onChange: (value: ProfessorFilterValue) => void
   /** Professor logado: adiciona a opção "Meus treinos" */
   meId?: number | null
+  /** Professores cadastrados (inclusive sem treino); somados aos que aparecem nos treinos */
+  professors?: { id: number; name: string }[]
 }
 
-function ProfessorFilter({ trainings, value, onChange, meId }: Props) {
-  const professors = professorsOf(trainings).filter(p => p.id !== meId)
+function ProfessorFilter({ trainings, value, onChange, meId, professors: extra = [] }: Props) {
+  const professors = professorsOf(trainings, extra).filter(p => p.id !== meId)
   const hasUnassigned = trainings.some(t => !t.professor)
 
   return (

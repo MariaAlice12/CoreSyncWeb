@@ -9,9 +9,12 @@ export function filterByProfessor(trainings: Training[], value: ProfessorFilterV
   return trainings.filter(t => String(t.professor?.id) === value)
 }
 
-/** Professores que aparecem nos treinos, sem repetir, em ordem alfabética */
-export function professorsOf(trainings: Training[]): { id: number; name: string }[] {
-  const byId = new Map<number, string>()
+/** Professores dos treinos (mais os extras), sem repetir, em ordem alfabética */
+export function professorsOf(
+  trainings: Training[],
+  extra: { id: number; name: string }[] = [],
+): { id: number; name: string }[] {
+  const byId = new Map<number, string>(extra.map(p => [p.id, p.name]))
   for (const t of trainings) if (t.professor) byId.set(t.professor.id, t.professor.name)
   return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
 }
