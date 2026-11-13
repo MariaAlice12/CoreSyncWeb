@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/backend/(.*)",
-      "destination": "https://qld-adaptation-tent-pipe.trycloudflare.com/backend/$1"
+      "destination": "https://exists-phys-suppliers-creation.trycloudflare.com/backend/$1"
     },
     {
       "source": "/(.*)",
