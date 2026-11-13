@@ -134,6 +134,12 @@ function StudentDashboard() {
       .finally(() => setLoadingEvents(false))
   }, [])
 
+  // A API já manda a mensagem pronta (ex.: treino lotado, 409); o fallback
+  // cobre erros sem mensagem, como falha de rede.
+  function showActionError(key: string, err: unknown, fallback: string) {
+    setActionError({ key, message: err instanceof Error ? err.message : fallback })
+  }
+
   async function handleEnroll(trainingId: number, selfLevel: TrainingLevel) {
     if (!userId) return
     setEnrollingId(trainingId)
@@ -143,11 +149,7 @@ function StudentDashboard() {
       // Matrícula cancelada é reativada pelo backend (mesmo id).
       setEnrollments(prev => [...prev.filter(e => e.id !== enrollment.id), enrollment])
     } catch (err) {
-      // Ex.: treino lotado (409) — a API já manda a mensagem pronta
-      setActionError({
-        key: `training-${trainingId}`,
-        message: err instanceof Error ? err.message : 'Não foi possível concluir a matrícula',
-      })
+      showActionError(`training-${trainingId}`, err, 'Não foi possível concluir a matrícula')
     } finally {
       setEnrollingId(null)
     }
@@ -177,11 +179,12 @@ function StudentDashboard() {
     const id = confirmUnenrollId
     setConfirmUnenrollId(null)
     setTogglingId(id)
+    setActionError(null)
     try {
       await updateEnrollment(id, { active: false })
       setEnrollments(prev => prev.map(e => e.id === id ? { ...e, active: false } : e))
-    } catch {
-      // silently ignore
+    } catch (err) {
+      showActionError(`enrollment-${id}`, err, 'Não foi possível cancelar a matrícula')
     } finally {
       setTogglingId(null)
     }
@@ -195,10 +198,7 @@ function StudentDashboard() {
       setEnrollments(prev => prev.map(e => e.id === enrollmentId ? { ...e, active: true } : e))
       setTab('meus-treinos')
     } catch (err) {
-      setActionError({
-        key: `enrollment-${enrollmentId}`,
-        message: err instanceof Error ? err.message : 'Não foi possível refazer a matrícula',
-      })
+      showActionError(`enrollment-${enrollmentId}`, err, 'Não foi possível refazer a matrícula')
     } finally {
       setTogglingId(null)
     }
@@ -207,23 +207,25 @@ function StudentDashboard() {
   async function handleEventRegister(eventId: number) {
     if (!userId) return
     setRegisteringEventId(eventId)
+    setActionError(null)
     try {
       const reg = await registerInEvent(eventId, userId)
       setEventRegs(prev => [...prev, reg])
-    } catch {
-      // silently ignore
+    } catch (err) {
+      showActionError(`event-${eventId}`, err, 'Não foi possível fazer a inscrição')
     } finally {
       setRegisteringEventId(null)
     }
   }
 
-  async function handleEventCancel(regId: number) {
+  async function handleEventCancel(regId: number, eventId: number) {
     setRegisteringEventId(regId)
+    setActionError(null)
     try {
       await updateEventRegistration(regId, { active: false })
       setEventRegs(prev => prev.map(r => r.id === regId ? { ...r, active: false } : r))
-    } catch {
-      // silently ignore
+    } catch (err) {
+      showActionError(`event-${eventId}`, err, 'Não foi possível cancelar a inscrição')
     } finally {
       setRegisteringEventId(null)
     }
@@ -365,13 +367,18 @@ function StudentDashboard() {
                   key={e.id}
                   training={e.training}
                   action={
-                    <button
-                      className="unenroll-btn"
-                      disabled={togglingId === e.id}
-                      onClick={() => setConfirmUnenrollId(e.id)}
-                    >
-                      {togglingId === e.id ? 'Aguarde...' : 'Cancelar matrícula'}
-                    </button>
+                    <>
+                      <button
+                        className="unenroll-btn"
+                        disabled={togglingId === e.id}
+                        onClick={() => setConfirmUnenrollId(e.id)}
+                      >
+                        {togglingId === e.id ? 'Aguarde...' : 'Cancelar matrícula'}
+                      </button>
+                      {actionError?.key === `enrollment-${e.id}` && (
+                        <p className="action-error" role="alert">{actionError.message}</p>
+                      )}
+                    </>
                   }
                 >
                   <p className="self-level-row">
@@ -467,10 +474,13 @@ function StudentDashboard() {
                           <button
                             className="unenroll-btn"
                             disabled={registeringEventId === myReg.id}
-                            onClick={() => handleEventCancel(myReg.id)}
+                            onClick={() => handleEventCancel(myReg.id, event.id)}
                           >
                             {registeringEventId === myReg.id ? 'Aguarde...' : 'Cancelar inscrição'}
                           </button>
+                        )}
+                        {actionError?.key === `event-${event.id}` && (
+                          <p className="action-error" role="alert">{actionError.message}</p>
                         )}
                       </div>
                     }

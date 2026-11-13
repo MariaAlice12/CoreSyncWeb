@@ -220,6 +220,11 @@
   line-height: 1.4;
 }
 
+/* O container de ações do evento já tem gap */
+.event-card-actions .action-error {
+  margin-top: 0;
+}
+
 .tab-badge {
   display: inline-flex;
   align-items: center;
