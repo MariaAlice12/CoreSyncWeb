@@ -33,7 +33,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const isRelative = BASE_URL.startsWith('/')
     const socket = io(`${isRelative ? window.location.origin : BASE_URL || window.location.origin}/notifications`, {
       auth: { token: getToken() },
-      transports: ['websocket'],
+      // Polling primeiro e upgrade para WebSocket quando possível: atrás do
+      // rewrite do Vercel o WebSocket não passa e fica só o polling.
+      transports: ['polling', 'websocket'],
       ...(isRelative ? { path: `${BASE_URL}/socket.io` } : {}),
     })
     socket.on('notification', (n: AppNotification) => {
